@@ -10,6 +10,7 @@ Module to manipulate data in Odoo via XML-RPC or embedded in a script
 '''
 
 import logging
+from . import StringConverters
 try:
     from . import Converters
     from . import OdooConnection
