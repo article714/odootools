@@ -4,3 +4,5 @@ encoding//odootools/OdooConnection.py=utf-8
 encoding//odootools/OdooScript.py=utf-8
 encoding//odootools/StringConverters.py=utf-8
 encoding//odootools/__init__.py=utf-8
+encoding//tests/__init__.py=utf-8
+encoding//tests/test_odooconn.py=utf-8
