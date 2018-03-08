@@ -7,14 +7,13 @@ Utility functions to convert data
 
 
 @author: C. Guychard
-@copyright: ©2017 Article714
+@copyright: ©2018 Article714
 @license: AGPL
 '''
 
 from configobj import ConfigObj
 import datetime
 import getopt
-import logging
 import logging
 import os.path
 import sys
