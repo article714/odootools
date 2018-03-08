@@ -11,6 +11,7 @@ Utility functions to convert data
 @license: AGPL
 '''
 
+import copy
 import logging
 import sys
 import xmlrpclib
@@ -134,7 +135,7 @@ class Connection:
             # create only if do not exist
             if lfound == 0:
                 try:
-                    result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                    obj_id = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
                                                     model_name, 'create', values)
@@ -142,21 +143,24 @@ class Connection:
                     self.logger.error("Failed to create record " + model_name + " [ " + toString(values) + "] " + toString(e))
 
             elif lfound == 1:
-                odoobject = found[0]
+                obj_id = found[0]
                 try:
                     if not create_only:
-                        odoobject.write(values)
+                        result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                   self.xmlrpc_uid,
+                                                   self.context.getConfigValue('odoo_password'),
+                                                    model_name, 'write', [obj_id, values])
                 except Exception as e:
-                    self.logger.error("Echec de mise à jour d'un enregistrement " + model._name + "(" + toString(odoobject.id) + ") [ " + toString(values) + "] " + toString(e))
+                    self.logger.error("Failed to write record " + model_name + "(" + toString(obj_id) + ") [ " + toString(values) + "] " + toString(e))
             else:
-                self.logger.warning("Echec de la mise à jour d'un enregistrement (" + model._name + ") trop d'objets trouvés pour " + str(search_criteria))
+                self.logger.warning("Failed to update record  (" + model_name + ") too many objects found for " + str(search_criteria))
 
             self.cr.commit()
 
-            return odoobject
+            return obj_id
 
         except Exception as e:
-            self.logger.error("WARNING Error when looking for or writing a record for model: " + model._name + " [ " + toString(values) + "] " + toString(e))
+            self.logger.error("WARNING Error when looking for or writing a record for model: " + model_name + " [ " + toString(values) + "] " + toString(e))
             
     # *************************************************************
     # Search elements in odoo
