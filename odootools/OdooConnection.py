@@ -128,30 +128,30 @@ class Connection(object):
                 full_search = copy.copy(search_criteria)
                 for val in ALL_INSTANCES_FILTER:
                     full_search.append(val)
-                found = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                found = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
-                                                    model_name, 'search_read', [full_search], 0, 0, False, False, self.odoo_context)
+                                                    model_name, 'search_read', full_search, 0, 0, False, False, self.odoo_context)
             else:
-                found = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                found = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
-                                                    model_name, 'search_read', [search_criteria], 0, 0, False, False, self.odoo_context)
+                                                    model_name, 'search_read', search_criteria, 0, 0, False, False, self.odoo_context)
                 
                 
             lfound = len(found)
             # create only if do not exist
             if lfound == 0:
                 try:
-                    obj_id = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                    obj_id = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
-                                                    model_name, 'create', values)
+                                                    model_name, 'create', values, 0, 0, False, False, self.odoo_context)
                 except Exception as e:
                     self.logger.error("Failed to create record " + model_name + " [ " + toString(values) + "] " + toString(e))
 
             elif lfound == 1:
-                obj_id = found[0]
+                obj_id = found[0]['id']
                 try:
                     if not create_only:
                         result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
@@ -162,8 +162,6 @@ class Connection(object):
                     self.logger.error("Failed to write record " + model_name + "(" + toString(obj_id) + ") [ " + toString(values) + "] " + toString(e))
             else:
                 self.logger.warning("Failed to update record  (" + model_name + ") too many objects found for " + str(search_criteria))
-
-            self.cr.commit()
 
             return obj_id
 
@@ -179,7 +177,7 @@ class Connection(object):
             result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
-                                                    model_name, 'search_read', [search_conditions], result_parameters)
+                                                    model_name, 'search_read', search_conditions, result_parameters)
             return result
         except xmlrpclib.Fault as e:
             logging.exception("WARNING: error when searching for object: " + model_name + " -> " + str(search_conditions))
@@ -262,6 +260,22 @@ class Connection(object):
             return result
         except xmlrpclib.Fault as e:
             print ("     WARNING: error when creating object: " + model_name + " -> " + str(values))
+            print ("                    MSG: {0} -> {1}".format(e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
+            return None
+
+    # *************************************************************
+    # Deletes  new element in odoo   // Single Object
+    def odoo_delete(self, model_name, obj_id):
+        if (self.xmlrpc_uid == None):
+            self.getXMLRPCConnection()
+        try:
+            result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                   self.xmlrpc_uid,
+                                                   self.context.getConfigValue('odoo_password'),
+                                                    model_name, 'unlink', [[obj_id]])
+            return result
+        except xmlrpclib.Fault as e:
+            print ("     WARNING: error when deleting object: " + model_name + " -> " + str(obj_id))
             print ("                    MSG: {0} -> {1}".format(e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
             return None
 
