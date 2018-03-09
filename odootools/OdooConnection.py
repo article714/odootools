@@ -16,7 +16,7 @@ import logging
 import sys
 import xmlrpclib
 
-from .StringConverters import toString
+from StringConverters import toString
 
 
 try:
@@ -26,6 +26,15 @@ except:
     logging.error("error on import PGDB module")
 
 
+#*****************************
+# CONSTANTS
+ALL_INSTANCES_FILTER = (u'|', (u'active', u'=', True), (u'active', u'!=', True))
+
+ODOO_DATE_FMT = '%Y-%m-%d %H:%M:%S'  # '2018-03-01 11:50:17'
+        
+        
+#*****************************
+# Main Classes
 class Connection(object):
 
     # scripting context
@@ -119,8 +128,7 @@ class Connection(object):
     # helper function to search and create or write if exist
 
     def odoo_search_create_or_write (self, model_name, search_criteria=[], values={}, create_only=False, can_be_archived=False):
-        ALL_INSTANCES_FILTER = (u'|', (u'active', u'=', True), (u'active', u'!=', True))
-      
+        obj_id = None    
         if (self.xmlrpc_uid == None):
             self.getXMLRPCConnection()
         try:
@@ -177,7 +185,7 @@ class Connection(object):
             result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue('odoo_password'),
-                                                    model_name, 'search_read', search_conditions, result_parameters)
+                                                    model_name, 'search_read', [search_conditions], result_parameters)
             return result
         except xmlrpclib.Fault as e:
             logging.exception("WARNING: error when searching for object: " + model_name + " -> " + str(search_conditions))
