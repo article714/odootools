@@ -26,7 +26,7 @@ except:
     logging.error("error on import PGDB module")
 
 
-class Connection:
+class Connection(object):
 
     # scripting context
     context = None
@@ -43,6 +43,10 @@ class Connection:
     # parameter script must be an instance of OdooScript
     def __init__(self, script):
         self.context = script
+        if script != None:
+            self.logger = script.logger
+        else:
+            self.logger = logging.getLogger(__name__)
 
     # *************************************************************
     # gets a New XMLRPC connection to odoo
@@ -53,11 +57,15 @@ class Connection:
 
         odoo_host = self.context.getConfigValue('odoo_host')
         odoo_port = self.context.getConfigValue('odoo_port')
-        if odoo_port == '443':
-            url = 'https://' + odoo_host
+        if odoo_host != None and odoo_port != None:
+            if odoo_port == '443':
+                url = 'https://' + odoo_host
+            else:
+                url = 'http://' + odoo_host + ':' + self.context.getConfigValue('odoo_port')
+            odoo_username = self.context.getConfigValue('odoo_username')
         else:
-            url = 'http://' + odoo_host + ':' + self.context.getConfigValue('odoo_port')
-        odoo_username = self.context.getConfigValue('odoo_username')
+            self.logger.error('no connection information provided')
+            return None
 
         # *************************************************************
         # establish xmlrpc link

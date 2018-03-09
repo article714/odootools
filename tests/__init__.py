@@ -9,5 +9,6 @@ Created on march 2018
 @license: AGPL
 '''
 
-from . import test_odooconn
-
+from tests import 00_test_converters
+from tests import 01_test_script
+from tests import 10_test_odooconn
