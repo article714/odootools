@@ -16,6 +16,6 @@ try:
     from . import OdooConnection
     from . import OdooScript
 except:
-    logging.exception("error on Odoo import")
+    logging.error("error on Odoo import")
     exit
 
