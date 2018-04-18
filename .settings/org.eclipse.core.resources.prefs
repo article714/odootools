@@ -9,4 +9,5 @@ encoding//test/scripts/__init__.py=utf-8
 encoding//test/scripts/aTestScript.py=utf-8
 encoding//test/test_converters.py=utf-8
 encoding//test/test_odooconn.py=utf-8
+encoding//test/test_odooconn_v7.py=utf-8
 encoding//test/test_script.py=utf-8

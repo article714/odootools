@@ -82,7 +82,25 @@ class Connection(object):
         # establish xmlrpc link
         # http://www.odoo.com/documentation/9.0/api_integration.html
 
-        common = xmlrpclib.ServerProxy('{}/xmlrpc/2/common'.format(url))
+        dbproxy = xmlrpclib.ServerProxy(
+            '{}/xmlrpc/db'.format(url), allow_none=True)
+
+        srv_ver = float(dbproxy.server_version().split('-')[0])
+        self.logger.info(" Connected to odoo server version %s" % str(srv_ver))
+
+        if srv_ver > 8.0:
+            common = xmlrpclib.ServerProxy(
+                '{}/xmlrpc/2/common'.format(url), allow_none=True)
+        else:
+            common = xmlrpclib.ServerProxy(
+                '{}/xmlrpc/common'.format(url), allow_none=True)
+
+        try:
+            v = common.version()
+        except Exception as e:
+            self.logger.exception("Paf! %s" % str(e))
+            return None
+
         lang = self.context.getConfigValue('language')
         if lang != None:
             self.odoo_context = {
@@ -94,8 +112,12 @@ class Connection(object):
                                   self.context.getConfigValue('odoo_username'),
                                   self.context.getConfigValue('odoo_password'), self.odoo_context)
 
-        odoo_models = xmlrpclib.ServerProxy(
-            '{}/xmlrpc/2/object'.format(url), allow_none=1, verbose=0)
+        if srv_ver > 8.0:
+            odoo_models = xmlrpclib.ServerProxy(
+                '{}/xmlrpc/2/object'.format(url), allow_none=True, verbose=0)
+        else:
+            odoo_models = xmlrpclib.ServerProxy(
+                '{}/xmlrpc/object'.format(url), allow_none=True, verbose=0)
 
         if not uid:
             print (
