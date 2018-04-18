@@ -16,7 +16,7 @@ import sys
 import unittest
 
 from odootools import OdooConnection
-from test.aTestScript import TestScript
+from .scripts.aTestScript import TestScript
 
 
 class TestOdooConn(unittest.TestCase):

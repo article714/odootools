@@ -10,13 +10,16 @@ Script used to unittest stuff
 @license: AGPL
 '''
 
+import unittest
+
 from odootools import OdooScript
 
+
+@unittest.skip("Not a test class")
 class TestScript(OdooScript.Script):
     '''
     A simple script used for unit testing
     '''
-
 
     def __init__(self):
         '''
