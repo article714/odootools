@@ -229,7 +229,6 @@ class Connection(object):
                                                       self.context.getConfigValue(
                     'odoo_password'),
                     model_name, 'search', [search_conditions], {'context': self.odoo_context})
-                print ("PROUT %s" % str(found))
                 if len(found) > 0:
                     result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
                                                            self.xmlrpc_uid,
@@ -260,7 +259,6 @@ class Connection(object):
                                                        'odoo_password'),
                                                    model_name, 'search', [search_conditions], {'context': self.odoo_context})
 
-            print('AH BON %s' % str(result))
             return result
         except xmlrpclib.Fault as e:
             logging.exception("     WARNING: error when searching for object: " +
