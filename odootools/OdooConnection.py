@@ -38,21 +38,16 @@ ODOO_DATE_FMT = '%Y-%m-%d %H:%M:%S'  # '2018-03-01 11:50:17'
 # Main Classes
 class Connection(object):
 
-    # scripting context
-    context = None
-
-    # xmlrpc connection
-    xmlrpc_uid = None
-    xmlrpc_models = None
-
-    # db connection
-    db_con = None
-
     # *************************************************************
     # constructor
     # parameter script must be an instance of OdooScript
     def __init__(self, ctx):
         self.context = ctx
+        # xmlrpc connection
+        self.xmlrpc_uid = None
+        self.xmlrpc_models = None
+        self.srv_ver = None
+
         if ctx != None:
             self.logger = ctx.logger
         else:
@@ -85,10 +80,11 @@ class Connection(object):
         dbproxy = xmlrpclib.ServerProxy(
             '{}/xmlrpc/db'.format(url), allow_none=True)
 
-        srv_ver = float(dbproxy.server_version().split('-')[0])
-        self.logger.info(" Connected to odoo server version %s" % str(srv_ver))
+        self.srv_ver = float(dbproxy.server_version().split('-')[0])
+        self.logger.info(" Connected to odoo server version %s" %
+                         str(self.srv_ver))
 
-        if srv_ver > 8.0:
+        if self.srv_ver > 8.0:
             common = xmlrpclib.ServerProxy(
                 '{}/xmlrpc/2/common'.format(url), allow_none=True)
         else:
@@ -112,7 +108,7 @@ class Connection(object):
                                   self.context.getConfigValue('odoo_username'),
                                   self.context.getConfigValue('odoo_password'), self.odoo_context)
 
-        if srv_ver > 8.0:
+        if self.srv_ver > 8.0:
             odoo_models = xmlrpclib.ServerProxy(
                 '{}/xmlrpc/2/object'.format(url), allow_none=True, verbose=0)
         else:
@@ -165,27 +161,23 @@ class Connection(object):
                 full_search = copy.copy(search_criteria)
                 for val in ALL_INSTANCES_FILTER:
                     full_search.append(val)
-                found = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
-                                                   self.xmlrpc_uid,
-                                                   self.context.getConfigValue(
-                                                       'odoo_password'),
-                                                   model_name, 'search_read', full_search, 0, 0, False, False, self.odoo_context)
+                found = self.odoo_search(
+                    model_name, full_search, [0, 0, False, False])
             else:
-                found = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
-                                                   self.xmlrpc_uid,
-                                                   self.context.getConfigValue(
-                                                       'odoo_password'),
-                                                   model_name, 'search_read', search_criteria, 0, 0, False, False, self.odoo_context)
 
+                found = self.odoo_search(
+                    model_name, search_criteria, [0, 0, False, False])
+
+            print('AH BON %s' % str(found))
             lfound = len(found)
             # create only if do not exist
             if lfound == 0:
                 try:
-                    obj_id = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
-                                                        self.xmlrpc_uid,
-                                                        self.context.getConfigValue(
-                                                            'odoo_password'),
-                                                        model_name, 'create', values, 0, 0, False, False, self.odoo_context)
+                    obj_id = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                           self.xmlrpc_uid,
+                                                           self.context.getConfigValue(
+                                                               'odoo_password'),
+                                                           model_name, 'create', [values], {'context': self.odoo_context})
                 except Exception as e:
                     self.logger.error("Failed to create record " + model_name +
                                       " [ " + toString(values) + "] " + toString(e))
@@ -198,7 +190,7 @@ class Connection(object):
                                                                self.xmlrpc_uid,
                                                                self.context.getConfigValue(
                                                                    'odoo_password'),
-                                                               model_name, 'write', [obj_id, values])
+                                                               model_name, 'write', [obj_id, values], {'context': self.odoo_context})
                 except Exception as e:
                     self.logger.error("Failed to write record " + model_name + "(" + toString(
                         obj_id) + ") [ " + toString(values) + "] " + toString(e))
@@ -218,31 +210,41 @@ class Connection(object):
         if (self.xmlrpc_uid == None):
             self.getXMLRPCConnection()
         try:
-            result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
-                                                   self.xmlrpc_uid,
-                                                   self.context.getConfigValue(
-                                                       'odoo_password'),
-                                                   model_name, 'search_read', [search_conditions], result_parameters)
-            return result
+
+            if self.srv_ver > 8.0:
+                result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                       self.xmlrpc_uid,
+                                                       self.context.getConfigValue(
+                                                           'odoo_password'),
+                                                       model_name,
+                                                       'search_read',
+                                                       [search_conditions,
+                                                           result_parameters],
+                                                       {'context': self.odoo_context}
+                                                       )
+                return result
+            else:
+                found = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                      self.xmlrpc_uid,
+                                                      self.context.getConfigValue(
+                    'odoo_password'),
+                    model_name, 'search', [search_conditions], {'context': self.odoo_context})
+                print ("PROUT %s" % str(found))
+                if len(found) > 0:
+                    result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                           self.xmlrpc_uid,
+                                                           self.context.getConfigValue(
+                                                               'odoo_password'),
+                                                           model_name, 'read',
+                                                           [found],
+                                                           {'context': self.odoo_context}
+                                                           )
+                    return result
+                else:
+                    return ()
+
         except xmlrpclib.Fault as e:
             logging.exception("WARNING: error when searching for object: " +
-                              model_name + " -> " + str(search_conditions))
-            return ()
-
-    # *************************************************************
-    # Search id of elements in odoo with language support enabled
-    def odoo_search_l10n(self, model_name, search_conditions, fields_selection):
-        if (self.xmlrpc_uid == None):
-            self.getXMLRPCConnection()
-        try:
-            result = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
-                                                self.xmlrpc_uid,
-                                                self.context.getConfigValue(
-                                                    'odoo_password'),
-                                                model_name, 'search_read', search_conditions, fields_selection, 0, 0, False, self.odoo_context)
-            return result
-        except xmlrpclib.Fault as e:
-            logging.exception("     WARNING: error when searching for object: " +
                               model_name + " -> " + str(search_conditions))
             return ()
 
@@ -252,11 +254,13 @@ class Connection(object):
         if (self.xmlrpc_uid == None):
             self.getXMLRPCConnection()
         try:
-            result = self.xmlrpc_models.execute(self.context.getConfigValue('db_name'),
-                                                self.xmlrpc_uid,
-                                                self.context.getConfigValue(
-                                                    'odoo_password'),
-                                                model_name, 'search', search_conditions, 0, 0, False, False, self.odoo_context)
+            result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                   self.xmlrpc_uid,
+                                                   self.context.getConfigValue(
+                                                       'odoo_password'),
+                                                   model_name, 'search', [search_conditions], {'context': self.odoo_context})
+
+            print('AH BON %s' % str(result))
             return result
         except xmlrpclib.Fault as e:
             logging.exception("     WARNING: error when searching for object: " +
@@ -274,7 +278,7 @@ class Connection(object):
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue(
                                                        'odoo_password'),
-                                                   model_name, 'read', [ids])
+                                                   model_name, 'read', [ids], {'context': self.odoo_context})
             return result
 
         except xmlrpclib.Fault as e:
@@ -294,7 +298,7 @@ class Connection(object):
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue(
                                                        'odoo_password'),
-                                                   model_name, 'write', [obj_id, values])
+                                                   model_name, 'write', [obj_id, values], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
             print ("     WARNING: error when writing object: " +
@@ -313,7 +317,7 @@ class Connection(object):
                                                    self.xmlrpc_uid,
                                                    self.context.getConfigValue(
                                                        'odoo_password'),
-                                                   model_name, 'create', values)
+                                                   model_name, 'create', [values], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
             print ("     WARNING: error when creating object: " +
@@ -323,35 +327,51 @@ class Connection(object):
             return None
 
     # *************************************************************
-    # Deletes  new element in odoo   // Single Object
-    def odoo_delete(self, model_name, obj_id):
+    # Deletes  new element in odoo
+    def odoo_delete(self, model_name, obj_ids):
         if (self.xmlrpc_uid == None):
             self.getXMLRPCConnection()
         try:
-            result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
-                                                   self.xmlrpc_uid,
-                                                   self.context.getConfigValue(
+            result = False
+            if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
+                result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                       self.xmlrpc_uid,
+                                                       self.context.getConfigValue(
                                                        'odoo_password'),
-                                                   model_name, 'unlink', [[obj_id]])
+                                                       model_name, 'unlink', [obj_ids], {'context': self.odoo_context})
+            elif isinstance(obj_ids, int):
+                result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                       self.xmlrpc_uid,
+                                                       self.context.getConfigValue(
+                                                       'odoo_password'),
+                                                       model_name, 'unlink', [[obj_ids]], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
             print ("     WARNING: error when deleting object: " +
-                   model_name + " -> " + str(obj_id))
+                   model_name + " -> " + str(obj_ids))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
             return None
 
     # *************************************************************
     # Execute stuff in odoo   // Single Object
-    def odoo_execute(self, model_name, method_name, obj_id, parameters):
+    def odoo_execute(self, model_name, method_name, obj_ids, parameters):
         if (self.xmlrpc_uid == None):
             self.getXMLRPCConnection()
         try:
-            result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
-                                                   self.xmlrpc_uid,
-                                                   self.context.getConfigValue(
+            result = False
+            if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
+                result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                       self.xmlrpc_uid,
+                                                       self.context.getConfigValue(
                                                        'odoo_password'),
-                                                   model_name, method_name, [obj_id], parameters)
+                                                       model_name, method_name, [obj_ids, parameters], {'context': self.odoo_context})
+            elif isinstance(obj_ids, int):
+                result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
+                                                       self.xmlrpc_uid,
+                                                       self.context.getConfigValue(
+                                                       'odoo_password'),
+                                                       model_name, method_name, [[obj_ids], parameters], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
             print ("     WARNING: error when executing " + method_name +
