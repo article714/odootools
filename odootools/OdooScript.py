@@ -224,6 +224,8 @@ class Script(object):
 
     def runWithRemoteOdoo(self):
 
+        self.init_logs()
+
         self.odooargs = []
         if odoo != False and self.config != None:
             self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
@@ -243,6 +245,8 @@ class Script(object):
     # Exectute main self script after starting an embedded Odoo Server
 
     def runInOdooContext(self):
+
+        self.init_logs()
 
         self.odooargs = []
         if odoo != False and self.config != None:
