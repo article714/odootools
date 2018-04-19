@@ -70,11 +70,14 @@ class Script(object):
 
         # Logging configuration
         self.logger = logging.getLogger(self.name)
+        self.logger_ch = None
+        self.logger_fh = None
 
         #******
         # args parsing
 
         self.configfile = None
+        self.config = None
         try:
             opts, odooargs = getopt.getopt(sys.argv[1:], "hc:", ["config="])
         except getopt.GetoptError:
@@ -241,13 +244,23 @@ class Script(object):
 
     def runInOdooContext(self):
 
-        if self.config != None:
+        self.odooargs = []
+        if odoo != False and self.config != None:
+
             self.dbname = self.getConfigValue("db_name")
 
-        if self.dbname != None and odoo != False:
-            self.logger.info("CONNECTING TO DB : " + self.dbname)
+            if self.dbname != None and odoo != False:
+                self.logger.info("CONNECTING TO DB : " + self.dbname)
+
+            if odoo != False and self.config != None:
+                self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
+                self.odooargs.append("-d" + self.dbname)
+                self.odooargs.append("--db_host=" + self.getConfigValue("db_host"))
+                self.odooargs.append("-r" + self.getConfigValue("db_username"))
+                self.odooargs.append("-w" + self.getConfigValue("db_password"))
 
             config.parse_config(self.odooargs)
+
             odoo.cli.server.report_configuration()
 
             with odoo.api.Environment.manage():
