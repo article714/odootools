@@ -151,7 +151,7 @@ class Script(object):
         output_dir = self.getConfigValue("output_directory")
         fh = None
         if output_dir != None:
-            logpath = output_dir + os.path.sep + "LOG" + os.path.sep
+            logpath = output_dir + os.path.sep
             filename_TS = datetime.datetime.now().strftime("%Y-%m-%d")
             fh = logging.FileHandler(
                 filename=logpath + self.name + '_' + filename_TS + '.log', mode='w')
