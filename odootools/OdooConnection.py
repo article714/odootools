@@ -81,7 +81,7 @@ class Connection(object):
             '{}/xmlrpc/db'.format(url), allow_none=True)
 
         self.srv_ver = float(dbproxy.server_version().split('-')[0])
-        self.logger.info(" Connected to odoo server version %s" %
+        self.logger.info(" Connected to odoo server version %s" % 
                          str(self.srv_ver))
 
         if self.srv_ver > 8.0:
@@ -168,7 +168,6 @@ class Connection(object):
                 found = self.odoo_search(
                     model_name, search_criteria, [0, 0, False, False])
 
-            print('AH BON %s' % str(found))
             lfound = len(found)
             # create only if do not exist
             if lfound == 0:
@@ -179,7 +178,7 @@ class Connection(object):
                                                                'odoo_password'),
                                                            model_name, 'create', [values], {'context': self.odoo_context})
                 except Exception as e:
-                    self.logger.error("Failed to create record " + model_name +
+                    self.logger.error("Failed to create record " + model_name + 
                                       " [ " + toString(values) + "] " + toString(e))
 
             elif lfound == 1:
@@ -195,13 +194,13 @@ class Connection(object):
                     self.logger.error("Failed to write record " + model_name + "(" + toString(
                         obj_id) + ") [ " + toString(values) + "] " + toString(e))
             else:
-                self.logger.warning("Failed to update record  (" + model_name +
+                self.logger.warning("Failed to update record  (" + model_name + 
                                     ") too many objects found for " + str(search_criteria))
 
             return obj_id
 
         except Exception as e:
-            self.logger.error("WARNING Error when looking for or writing a record for model: " +
+            self.logger.error("WARNING Error when looking for or writing a record for model: " + 
                               model_name + " [ " + toString(values) + "] " + toString(e))
 
     # *************************************************************
@@ -243,7 +242,7 @@ class Connection(object):
                     return ()
 
         except xmlrpclib.Fault as e:
-            logging.exception("WARNING: error when searching for object: " +
+            logging.exception("WARNING: error when searching for object: " + 
                               model_name + " -> " + str(search_conditions))
             return ()
 
@@ -261,7 +260,7 @@ class Connection(object):
 
             return result
         except xmlrpclib.Fault as e:
-            logging.exception("     WARNING: error when searching for object: " +
+            logging.exception("     WARNING: error when searching for object: " + 
                               model_name + " -> " + str(search_conditions))
             return ()
 
@@ -280,7 +279,7 @@ class Connection(object):
             return result
 
         except xmlrpclib.Fault as e:
-            print ("     WARNING: error when reading  object: " +
+            print ("     WARNING: error when reading  object: " + 
                    model_name + " -> " + str(ids))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
@@ -299,7 +298,7 @@ class Connection(object):
                                                    model_name, 'write', [obj_id, values], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
-            print ("     WARNING: error when writing object: " +
+            print ("     WARNING: error when writing object: " + 
                    model_name + " -> " + str(values))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
@@ -318,7 +317,7 @@ class Connection(object):
                                                    model_name, 'create', [values], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
-            print ("     WARNING: error when creating object: " +
+            print ("     WARNING: error when creating object: " + 
                    model_name + " -> " + str(values))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
@@ -345,7 +344,7 @@ class Connection(object):
                                                        model_name, 'unlink', [[obj_ids]], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
-            print ("     WARNING: error when deleting object: " +
+            print ("     WARNING: error when deleting object: " + 
                    model_name + " -> " + str(obj_ids))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
@@ -372,7 +371,7 @@ class Connection(object):
                                                        model_name, method_name, [[obj_ids], parameters], {'context': self.odoo_context})
             return result
         except xmlrpclib.Fault as e:
-            print ("     WARNING: error when executing " + method_name +
+            print ("     WARNING: error when executing " + method_name + 
                    " on object: " + model_name + " -> " + str(parameters))
             print ("                    MSG: {0} -> {1}".format(
                 e.faultCode, ''.join(e.faultString.split('\n')[-2:])))
