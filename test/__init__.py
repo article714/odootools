@@ -10,5 +10,3 @@ Created on march 2018
 '''
 
 from . import test_converters
-from . import test_odooconn
-from . import test_script

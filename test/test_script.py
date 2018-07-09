@@ -16,7 +16,7 @@ from os.path import sep
 import sys
 import unittest
 
-from .scripts.aTestScript import TestScript
+from test.scripts.aSampleScript import SampleScript
 
 
 class TestOdooScript(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestOdooScript(unittest.TestCase):
     def setUp(self):
         """Test Init"""
         sys.argv = ["testing", ]
-        self.innerScript = TestScript()
+        self.innerScript = SampleScript()
 
     def test_parse_config(self):
         self.innerScript.parseConfig(

@@ -10,13 +10,14 @@ Script used to unittest stuff
 @license: AGPL
 '''
 
-import unittest
+import pytest
 
 from odootools import OdooScript
 
 
-@unittest.skip("Not a test class")
-class TestScript(OdooScript.Script):
+@pytest.mark.skipif(True,
+                    reason="Not a test class")
+class SampleScript(OdooScript.Script):
     '''
     A simple script used for unit testing
     '''
@@ -25,4 +26,4 @@ class TestScript(OdooScript.Script):
         '''
         Constructor
         '''
-        super(TestScript, self).__init__(parseConfig=False)
+        super(SampleScript, self).__init__(parseConfig=False)

@@ -18,7 +18,7 @@ from odootools import StringConverters
 
 
 class TestConverters(unittest.TestCase):
-    
+
     def setUp(self):
         """Test Init"""
         self.aDate = datetime.now()

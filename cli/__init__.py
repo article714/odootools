@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 '''
-Created on april 2018
+Created on July 2018
 
+CLI for Odoo, add some more commandes to Odoo
 
 @author: C. Guychard
 @copyright: ©2018 Article714
 @license: AGPL
 '''
-
-from test.scripts import aSampleScript

@@ -16,7 +16,7 @@ import sys
 import unittest
 
 from odootools import OdooConnection
-from .scripts.aTestScript import TestScript
+from test.scripts.aSampleScript import SampleScript
 
 
 class TestOdooConn(unittest.TestCase):
@@ -24,7 +24,7 @@ class TestOdooConn(unittest.TestCase):
     def setUp(self):
         """Test Init"""
         sys.argv = ["testing", ]
-        self.innerScript = TestScript()
+        self.innerScript = SampleScript()
         self.innerScript.parseConfig(
             aConfigfile='test%setc%stestScript.config' % (sep, sep,))
 
