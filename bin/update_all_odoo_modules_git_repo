@@ -52,16 +52,17 @@ fi
 
 ADDONS_DIR="${addons_directory}"
 
+CUR_DIR=`pwd`
+
 if [ -d $ADDONS_DIR ]; then
 	LIST_DIRS=`find $ADDONS_DIR -name .git -exec dirname {} \;`
 	
 	for d in $LIST_DIRS; do
-	
+		cd $d
 		inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
 
 		if [ "$inside_git_repo" ]; then
 			echo "#### Pulling Source Code into $d"
-			cd $d
 			git clean -d -f
 			git pull
 			git reset --hard		  
@@ -75,3 +76,5 @@ else
 	echo "cannot find addons directory: ${ADDONS_DIR}"
 	exit -1
 fi
+
+cd ${CUR_DIR}
