@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 #-------------------
 # test args
@@ -41,12 +41,12 @@ fi
 
 user=`id -u -n`
 
-if [ "$os_user" = "" ]; then
-	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}"
-else if  [ "$user" != "$os_user" ]; then
-	
-	echo "YOU MUST RUN THIS SCRIPT AS $os_user"
+if [ "${os_user}" = "" ]; then
+	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}";
+elif  [ "${user}" != "${os_user}" ]; then
+	echo "YOU MUST RUN THIS SCRIPT AS ${os_user}"
 	exit -1
+	fi
 fi
 
 
