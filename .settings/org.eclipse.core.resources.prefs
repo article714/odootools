@@ -1,5 +1,6 @@
 eclipse.preferences.version=1
 encoding//cli/__init__.py=utf-8
+encoding//odootools/OdooConnection.py=utf-8
 encoding//odootools/__init__.py=utf-8
 encoding//scripts/test_config_file.py=utf-8
 encoding//scripts/upgrade_all_modules.py=utf-8
