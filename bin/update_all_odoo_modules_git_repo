@@ -20,6 +20,8 @@ if [ "$user" != "$os_user" ]; then
 	
 	echo "YOU MUST RUN THIS SCRIPT AS $os_user"
 	exit -1
+elif [ "$os_user" = "" ]; then
+	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}"
 fi
 
 
