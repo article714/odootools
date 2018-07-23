@@ -16,12 +16,12 @@ source ${1}
 
 user=`id -u -n`
 
-if [ "$user" != "$os_user" ]; then
+if [ "$os_user" = "" ]; then
+	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}"
+elif  [ "$user" != "$os_user" ]; then
 	
 	echo "YOU MUST RUN THIS SCRIPT AS $os_user"
 	exit -1
-elif [ "$os_user" = "" ]; then
-	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}"
 fi
 
 
