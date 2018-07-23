@@ -73,6 +73,6 @@ if [ -d $ADDONS_DIR ]; then
 		
 	done
 else:
-	echo "cannot find 
+	echo "cannot find addons directory: ${ADDONS_DIR}"
 	exit -1
 fi
