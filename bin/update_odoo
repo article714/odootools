@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#set -x
+
+
+#-------------------
+# test args
+
+if [ "${1}" = "" ] ; then
+	echo 
+	echo "USAGE: ${0} <configfile>"
+	echo
+	exit -1
+fi
+
+source ${1}
+
+#-------------------
+# checks
+
+if [ -f ${tools_directory}/bin/script-functions ]; then
+   source  ${tools_directory}/bin/script-functions
+   run_checks
+else
+   echo "ERROR: cannot find script-functions file"
+   exit -1
+fi
+
+#-------------------
+# find Config file
+
+if [ -f ${odoo_config} ] ; then
+	CONFIG_FILE=`realpath ${odoo_config}`
+else
+	echo "ERROR: cannot find config file ${odoo_config}"
+	exit -1
+fi
+
+#-------------------
+# udpdate PYTHONPATH
+
+
+if [ -d ${addons_directory}/odootools ]; then
+	export PYTHONPATH=${PYTHONPATH}:${addons_directory}/odootools
+else
+	echo "cannot find odootools, please install"
+	exit -1
+fi
+
+
+#-------------------
+# init db and install modules
+
+echo "--	upgrade odoo database"
+
+python ${tools_directory}/scripts/upgrade_all_modules.py -c ${1}
+
+

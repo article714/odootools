@@ -1,0 +1,51 @@
+#!/bin/bash
+
+set -x
+
+if [ "${1}" = "" ]; then
+	echo 
+	echo "USAGE: ${0} <configfile>"
+	echo
+	exit -1
+fi
+
+source ${1}
+
+#-------------------
+# must run as ${os_user}
+
+user=`id -u -n`
+
+if [ "$user" != "$os_user" ]; then
+	
+	echo "YOU MUST RUN THIS SCRIPT AS $os_user"
+	exit -1
+fi
+
+
+
+ADDONS_DIR="${addons_directory}"
+
+if [ -d $ADDONS_DIR ]; then
+	LIST_DIRS=`find $ADDONS_DIR -name .git -exec dirname {} \;`
+	
+	for d in $LIST_DIRS; do
+	
+		inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+
+		if [ "$inside_git_repo" ]; then
+			echo "#### Pulling Source Code into $d"
+			cd $d
+			git clean -d -f
+			git pull
+			git reset --hard		  
+		else
+			echo  "#### $d is not a git workdir"
+		fi
+	
+		
+	done
+else:
+	echo "cannot find 
+	exit -1
+fi
