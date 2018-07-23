@@ -46,7 +46,6 @@ if [ "${os_user}" = "" ]; then
 elif  [ "${user}" != "${os_user}" ]; then
 	echo "YOU MUST RUN THIS SCRIPT AS ${os_user}"
 	exit -1
-	fi
 fi
 
 
