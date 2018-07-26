@@ -34,8 +34,8 @@ class upgrade_all_modules(OdooScript.Script):
                 if db_host:
                     self.odooargs.append("--db_host=%s" % db_host)
                 if db_usr and db_pwd:
-                    self.odooargs.append("-r %s" % db_usr)
-                    self.odooargs.append("-w %s" % db_pwd)
+                    self.odooargs.append("-r%s" % db_usr)
+                    self.odooargs.append("-w%s" % db_pwd)
                 self.odooargs.append("--update=all")
 
             config.parse_config(self.odooargs)

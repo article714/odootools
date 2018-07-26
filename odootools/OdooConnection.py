@@ -210,6 +210,11 @@ class Connection(object):
             self.getXMLRPCConnection()
         try:
 
+            if result_parameters:
+                result_parameters['context'] = self.odoo_context
+            else:
+                result_parameters = {'context': self.odoo_context}
+
             if self.srv_ver > 8.0:
                 result = self.xmlrpc_models.execute_kw(self.context.getConfigValue('db_name'),
                                                        self.xmlrpc_uid,
@@ -217,9 +222,9 @@ class Connection(object):
                                                            'odoo_password'),
                                                        model_name,
                                                        'search_read',
-                                                       [search_conditions,
-                                                           result_parameters],
-                                                       {'context': self.odoo_context}
+                                                       [search_conditions],
+                                                       result_parameters
+
                                                        )
                 return result
             else:
