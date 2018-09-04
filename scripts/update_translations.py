@@ -43,7 +43,7 @@ class update_translations(OdooScript.Script):
             # Reload with override            
             self.logger.warning(u"Reloading for : %s", str(lang_name))
             mods = self.env['ir.module.module'].search([('state', '=', 'installed')])
-            mods.with_context(overwrite=True).update_translations(lang)
+            mods.with_context(overwrite=True).update_translations(lang_code)
 
         self.cr.commit()
 
