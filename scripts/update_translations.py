@@ -36,12 +36,12 @@ class update_translations(OdooScript.Script):
             
             # Synchronize
             with contextlib.closing(cStringIO.StringIO()) as buf:
-                self.logger.warning(u"Synchronizing for : %s", str(lang_name))
+                self.logger.warning(u"Synchronizing for : %s", lang_name)
                 tools.trans_export(lang_code, ['all'], buf, 'csv', self.cr)
                 tools.trans_load_data(self.cr, buf, 'csv', lang_code, lang_name=lang_name)
                 
             # Reload with override            
-            self.logger.warning(u"Reloading for : %s", str(lang_name))
+            self.logger.warning(u"Reloading for : %s", lang_name)
             mods = self.env['ir.module.module'].search([('state', '=', 'installed')])
             mods.with_context(overwrite=True).update_translations(lang_code)
 
