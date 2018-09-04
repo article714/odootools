@@ -51,7 +51,7 @@ fi
 #-------------------
 # init db and install modules
 
-echo "--	upgrade odoo database"
+echo "--	update odoo translations"
 
 python ${tools_directory}/scripts/update_translations.py -c ${1}
 

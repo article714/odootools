@@ -53,4 +53,4 @@ class update_translations(OdooScript.Script):
 
 if __name__ == "__main__":
     script = update_translations()
-    script.run()
+    script.runInOdooContext()
