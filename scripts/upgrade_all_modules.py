@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import logging
-
+import odoo
 from odoo.tools import config
 from odootools import OdooScript
-import odoo
 
 
 class upgrade_all_modules(OdooScript.Script):
@@ -59,7 +57,6 @@ class upgrade_all_modules(OdooScript.Script):
         else:
             self.logger.error(
                 "NO DB NAME given or No Odoo installation provided")
-
 
 #*******************************************************
 # Launch main function
