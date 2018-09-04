@@ -53,6 +53,6 @@ fi
 
 echo "--	upgrade odoo database"
 
-python ${tools_directory}/scripts/upgrade_translations.py -c ${1}
+python ${tools_directory}/scripts/update_translations.py -c ${1}
 
 
