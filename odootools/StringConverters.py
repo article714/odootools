@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Created on march 2018
 
 Utility functions to convert data
@@ -9,17 +9,17 @@ Utility functions to convert data
 @author: C. Guychard
 @copyright: ©2018 Article714
 @license: AGPL
-'''
+"""
 
 from datetime import date, timedelta, datetime
 
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 # CONSTANTS
 
 XLS_DATE_REF = date(1900, 1, 1)
 
 
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 #  Utility: Transfo des chaines en unicode
 def toString(value):
     avalue = ""
@@ -27,7 +27,7 @@ def toString(value):
         try:
             avalue = unicode(value)
         except UnicodeError:
-            avalue = unicode(value.decode('iso-8859-1'))
+            avalue = unicode(value.decode("iso-8859-1"))
     elif isinstance(value, unicode):
         avalue = value
     elif isinstance(value, Exception):
@@ -38,10 +38,11 @@ def toString(value):
         try:
             avalue = unicode("" + str(value))
         except UnicodeDecodeError:
-            avalue = unicode(value.decode('iso-8859-1'))
+            avalue = unicode(value.decode("iso-8859-1"))
     return avalue
 
-#-------------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------
 #  Utility: Transfo de chaine en date
 
 
@@ -57,20 +58,19 @@ def toDate(value):
 
     if val_date == None:
         try:
-            val_date = datetime.strptime(value, '%d/%m/%Y')
+            val_date = datetime.strptime(value, "%d/%m/%Y")
         except Exception:
             val_date = None
         try:
             if val_date == None:
-                val_date = datetime.strptime(value, '%Y-%m-%d 00:00:00')
+                val_date = datetime.strptime(value, "%Y-%m-%d 00:00:00")
         except Exception:
             val_date = None
 
     return val_date
 
 
-
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 #  Utility: Transfo de valeur en float
 def toFloat(value):
 
@@ -82,7 +82,7 @@ def toFloat(value):
     return val
 
 
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 # translate string to Int
 # None, unparseable or empty string is -1
 def toInt(s):
@@ -99,4 +99,3 @@ def toInt(s):
             return int(float(s))
         except ValueError:
             return -1
-

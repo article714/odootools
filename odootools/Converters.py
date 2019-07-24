@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Created on march 2018
 
 Utility functions to convert data
@@ -9,7 +9,7 @@ Utility functions to convert data
 @author: C. Guychard
 @copyright: ©2018 Article714
 @license: AGPL
-'''
+"""
 
 from datetime import date, timedelta, datetime
 
@@ -18,13 +18,12 @@ from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMA
 from .StringConverters import toString
 
 
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 # CONSTANTS
 XLS_DATE_REF = date(1900, 1, 1)
 
 
-
-#-------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------
 #  Utility: Transfo de chaine en date
 
 
@@ -35,4 +34,3 @@ def dateToOdooString(val):
         return val.strftime(DEFAULT_SERVER_DATE_FORMAT)
     else:
         return toString(val)
-
