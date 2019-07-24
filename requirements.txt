@@ -1,2 +1,3 @@
 configobj
 pytest
+xmlrpclib
