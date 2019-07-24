@@ -14,7 +14,7 @@ Utility functions to convert data
 import copy
 import logging
 import sys
-import xmlrpclib
+import xmlrpc.client as xmlrpclib
 
 from StringConverters import toString
 
