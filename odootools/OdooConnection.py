@@ -24,7 +24,7 @@ try:
 except:
     pgdb = False
     logging.warning(
-        "error on import PGDB module => cannot connect locally to ODOO "
+        "error on import PGDB module => cannot connect locally to POSTGRESQL "
     )
 
 
