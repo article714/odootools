@@ -67,8 +67,7 @@ class Script(object):
         # Basic Logging configuration
 
         logging.basicConfig(
-            level=logging.INFO,
-            format="%(relativeCreated)6d %(threadName)s %(message)s",
+            level=logging.INFO, format="%(relativeCreated)6d %(threadName)s %(message)s"
         )
 
         # Logging configuration
@@ -82,9 +81,7 @@ class Script(object):
         self.configfile = None
         self.config = None
         try:
-            opts, unneededargs = getopt.getopt(
-                sys.argv[1:], "hc:", ["config="]
-            )
+            opts, unneededargs = getopt.getopt(sys.argv[1:], "hc:", ["config="])
         except getopt.GetoptError:
             print("USAGE : \n\t %s.py -c <configfile>" % (self.name,))
             sys.exit(2)
@@ -161,8 +158,7 @@ class Script(object):
             logpath = output_dir + os.path.sep
             filename_TS = datetime.datetime.now().strftime("%Y-%m-%d")
             fh = logging.FileHandler(
-                filename=logpath + self.name + "_" + filename_TS + ".log",
-                mode="w",
+                filename=logpath + self.name + "_" + filename_TS + ".log", mode="w"
             )
             fh.setLevel(level=logging.INFO)
 
@@ -216,9 +212,7 @@ class Script(object):
                 "ERROR: Given Config file is not a file or path is not correct : %s\n"
                 % (str(self.configfile),)
             )
-            self.logger.error(
-                "USAGE: \n\t %s.py -c <configfile>" % (self.name,)
-            )
+            self.logger.error("USAGE: \n\t %s.py -c <configfile>" % (self.name,))
             self.config = None
 
         if self.config == None:
@@ -266,9 +260,7 @@ class Script(object):
             if odoo != False and self.config != None:
                 self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
                 self.odooargs.append("-d" + self.dbname)
-                self.odooargs.append(
-                    "--db_host=" + self.getConfigValue("db_host")
-                )
+                self.odooargs.append("--db_host=" + self.getConfigValue("db_host"))
                 self.odooargs.append("-r" + self.getConfigValue("db_username"))
                 self.odooargs.append("-w" + self.getConfigValue("db_password"))
 
@@ -281,9 +273,7 @@ class Script(object):
                 odoo.modules.load_modules(registry)
                 self.cr = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cr, uid, {})[
-                    "res.users"
-                ].context_get()
+                ctx = odoo.api.Environment(self.cr, uid, {})["res.users"].context_get()
                 self.env = odoo.api.Environment(self.cr, uid, ctx)
 
                 self.run()
@@ -292,9 +282,7 @@ class Script(object):
                 self.cr.close()
 
         else:
-            self.logger.error(
-                "NO DB NAME given or No Odoo installation provided"
-            )
+            self.logger.error("NO DB NAME given or No Odoo installation provided")
 
     # *************************************************************************
     # Main Processing Method
