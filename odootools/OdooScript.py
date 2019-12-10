@@ -191,7 +191,7 @@ class Script(object):
     # Utils to get values from config
     def getConfigValue(self, name, default=None):
         if self.config != None:
-            return self.config.get(name,default)
+            return self.config.get(name, default)
         else:
             return None
 
