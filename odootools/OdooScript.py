@@ -23,13 +23,13 @@ from . import OdooConnection
 
 try:
     import odoo
-except:
+except Exception:
     odoo = False
     logging.error("error on Odoo import")
 
 try:
     from odoo.tools import config
-except:
+except Exception:
     config = False
 
 # ************************************************
@@ -124,15 +124,15 @@ class Script(object):
         INTERACTIVE = False
         DEBUG = False
 
-        if self.config != None:
+        if self.config is not None:
             INTERACTIVE = self.config.get("INTERACTIVE", 0) == "1"
             DEBUG = self.config.get("DEBUG", 0) == "1"
 
-        if self.logger != None:
-            if self.logger_ch != None:
+        if self.logger is not None:
+            if self.logger_ch is not None:
                 self.logger.removeHandler(self.logger_ch)
                 self.logger_ch.close()
-            if self.logger_fh != None:
+            if self.logger_fh is not None:
                 self.logger.removeHandler(self.logger_fh)
                 self.logger_fh.close()
         else:
@@ -154,7 +154,7 @@ class Script(object):
         # fichier de log
         output_dir = self.getConfigValue("output_directory")
         fh = None
-        if output_dir != None:
+        if output_dir is not None:
             logpath = output_dir + os.path.sep
             filename_TS = datetime.datetime.now().strftime("%Y-%m-%d")
             fh = logging.FileHandler(
@@ -190,7 +190,7 @@ class Script(object):
     # *************************************************************
     # Utils to get values from config
     def getConfigValue(self, name, default=None):
-        if self.config != None:
+        if self.config is not None:
             return self.config.get(name, default)
         else:
             return None
@@ -200,7 +200,7 @@ class Script(object):
 
     def parseConfig(self, aConfigfile=None):
 
-        if aConfigfile != None:
+        if aConfigfile is not None:
             self.configfile = aConfigfile
 
         if self.configfile == None:
@@ -219,7 +219,7 @@ class Script(object):
             try:
 
                 self.config = ConfigObj(self.configfile)
-            except:
+            except Exception:
                 print(
                     "ERROR: Cannot parse config file, syntax error (%s)"
                     % (self.configfile,)
@@ -250,14 +250,14 @@ class Script(object):
         self.init_logs()
 
         self.odooargs = []
-        if odoo != False and self.config != None:
+        if odoo != False and self.config is not None:
 
             self.dbname = self.getConfigValue("db_name")
 
-            if self.dbname != None and odoo != False:
+            if self.dbname is not None and odoo != False:
                 self.logger.info("CONNECTING TO DB : " + self.dbname)
 
-            if odoo != False and self.config != None:
+            if odoo != False and self.config is not None:
                 self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
                 self.odooargs.append("-d" + self.dbname)
                 self.odooargs.append("--db_host=" + self.getConfigValue("db_host"))

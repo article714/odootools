@@ -21,7 +21,7 @@ from .StringConverters import toString
 
 try:
     import pgdb
-except:
+except Exception:
     pgdb = False
     logging.warning(
         "error on import PGDB module => cannot connect locally to POSTGRESQL "
@@ -49,7 +49,7 @@ class Connection(object):
         self.xmlrpc_models = None
         self.srv_ver = None
 
-        if ctx != None:
+        if ctx is not None:
             self.logger = ctx.logger
         else:
             self.logger = logging.getLogger(__name__)
@@ -58,12 +58,12 @@ class Connection(object):
     # gets a New XMLRPC connection to odoo
     def getXMLRPCConnection(self):
 
-        if self.xmlrpc_uid != None:
+        if self.xmlrpc_uid is not None:
             return (self.xmlrpc_uid, self.xmlrpc_models)
 
         odoo_host = self.context.getConfigValue("odoo_host")
         odoo_port = self.context.getConfigValue("odoo_port")
-        if odoo_host != None and odoo_port != None:
+        if odoo_host is not None and odoo_port is not None:
             if odoo_port == "443":
                 url = "https://" + odoo_host
             else:
@@ -103,7 +103,7 @@ class Connection(object):
             return None
 
         lang = self.context.getConfigValue("language")
-        if lang != None:
+        if lang is not None:
             self.odoo_context = {"lang": self.context.getConfigValue("language")}
         else:
             self.odoo_context = {"lang": "fr_FR"}
@@ -150,7 +150,7 @@ class Connection(object):
                     database=db_name, user=self.context.getConfigValue("db_username")
                 )
             else:
-                if self.context.getConfigValue("db_password") != None:
+                if self.context.getConfigValue("db_password") is not None:
                     return pgdb.connect(
                         database=db_name,
                         dsn=ldsn,

@@ -16,6 +16,6 @@ try:
     from . import Converters
     from . import OdooConnection
     from . import OdooScript
-except:
+except Exception:
     logging.error("error on Odoo import")
     exit

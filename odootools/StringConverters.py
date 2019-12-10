@@ -79,7 +79,7 @@ def toFloat(value):
 # None, unparseable or empty string is -1
 def toInt(s):
     try:
-        if s != None:
+        if s is not None:
             if len(s) == 0:
                 return -1
             else:
