@@ -16,17 +16,17 @@ class upgrade_all_modules(OdooScript.Script):
         self.init_logs()
 
         self.odooargs = []
-        if odoo != False and self.config != None:
+        if odoo != False and self.config is not None:
 
             self.dbname = self.getConfigValue("db_name")
             db_host = self.getConfigValue("db_host")
             db_usr = self.getConfigValue("db_username")
             db_pwd = self.getConfigValue("db_password")
 
-            if self.dbname != None and odoo != False:
+            if self.dbname is not None and odoo != False:
                 self.logger.info("CONNECTING TO DB : " + self.dbname)
 
-            if odoo != False and self.config != None:
+            if odoo != False and self.config is not None:
                 self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
                 self.odooargs.append("-d" + self.dbname)
                 if db_host:
