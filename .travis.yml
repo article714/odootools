@@ -66,6 +66,7 @@ install:
   - travis_install_nightly
 
 script:
+  - travis_run_tests
   - ls -alrt /etc/
   - python3 scripts/remove_module.py ci/basic.config
   - odoo --help
