@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import contextlib
@@ -28,9 +28,7 @@ class update_translations(OdooScript.Script):
     def run(self):
 
         languages = self.get_languages()
-        self.logger.warning(
-            u"Will reload all following languages: %s", str(languages)
-        )
+        self.logger.warning(u"Will reload all following languages: %s", str(languages))
 
         for lang_inst in languages:
             lang_code = lang_inst[0]
@@ -47,9 +45,7 @@ class update_translations(OdooScript.Script):
 
             # Reload with override
             self.logger.warning(u"Reloading for : %s", lang_name)
-            mods = self.env["ir.module.module"].search(
-                [("state", "=", "installed")]
-            )
+            mods = self.env["ir.module.module"].search([("state", "=", "installed")])
             mods.with_context(overwrite=True).update_translations(lang_code)
 
         self.cr.commit()

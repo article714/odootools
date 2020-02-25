@@ -7,11 +7,11 @@ Utility functions to convert data
 
 
 @author: C. Guychard
-@copyright: ©2018 Article714
+@copyright: ©2018-2020 Article714
 @license: AGPL
 """
 
-from datetime import date, timedelta, datetime
+from datetime import date, datetime
 
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 

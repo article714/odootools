@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import odoo
@@ -45,9 +45,7 @@ class upgrade_all_modules(OdooScript.Script):
                 odoo.modules.load_modules(registry)
                 self.cr = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cr, uid, {})[
-                    "res.users"
-                ].context_get()
+                ctx = odoo.api.Environment(self.cr, uid, {})["res.users"].context_get()
                 self.env = odoo.api.Environment(self.cr, uid, ctx)
 
                 self.logger.warn("FINISHING UPGRADE" + self.dbname)
@@ -56,9 +54,7 @@ class upgrade_all_modules(OdooScript.Script):
                 self.cr.close()
 
         else:
-            self.logger.error(
-                "NO DB NAME given or No Odoo installation provided"
-            )
+            self.logger.error("NO DB NAME given or No Odoo installation provided")
 
 
 # *******************************************************
