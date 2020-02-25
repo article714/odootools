@@ -45,7 +45,7 @@ FORMAT_FIC = "%(asctime)s - %(levelname)s - %(message)s"
 
 class Script(object):
     """
-    A generic Class to capitalize technical stuffs
+    A generic Class to capitalize technical stuffs and ease the writings of scripts for Odoo
     """
 
     config = None
@@ -67,7 +67,8 @@ class Script(object):
         # Basic Logging configuration
 
         logging.basicConfig(
-            level=logging.INFO, format="%(relativeCreated)6d %(threadName)s %(message)s"
+            level=logging.INFO,
+            format="%(relativeCreated)6d %(threadName)s %(message)s",
         )
 
         # Logging configuration
@@ -81,7 +82,9 @@ class Script(object):
         self.configfile = None
         self.config = None
         try:
-            opts, unneededargs = getopt.getopt(sys.argv[1:], "hc:", ["config="])
+            opts, unneededargs = getopt.getopt(
+                sys.argv[1:], "hc:", ["config="]
+            )
         except getopt.GetoptError:
             print("USAGE : \n\t %s.py -c <configfile>" % (self.name,))
             sys.exit(2)
@@ -158,7 +161,8 @@ class Script(object):
             logpath = output_dir + os.path.sep
             filename_TS = datetime.datetime.now().strftime("%Y-%m-%d")
             fh = logging.FileHandler(
-                filename=logpath + self.name + "_" + filename_TS + ".log", mode="w"
+                filename=logpath + self.name + "_" + filename_TS + ".log",
+                mode="w",
             )
             fh.setLevel(level=logging.INFO)
 
@@ -203,19 +207,21 @@ class Script(object):
         if aConfigfile is not None:
             self.configfile = aConfigfile
 
-        if self.configfile == None:
+        if self.configfile is None:
             self.logger.error("USAGE : \n\t" + self.name + " -c <configfile>")
             sys.exit(1)
 
         if not os.path.isfile(self.configfile):
             self.logger.error(
-                "ERROR: Given Config file is not a file or path is not correct : %s\n"
-                % (str(self.configfile),)
+                "ERROR: Given Config file is not a file or path "
+                "is not correct : %s\n" % (str(self.configfile),)
             )
-            self.logger.error("USAGE: \n\t %s.py -c <configfile>" % (self.name,))
+            self.logger.error(
+                "USAGE: \n\t %s.py -c <configfile>" % (self.name,)
+            )
             self.config = None
 
-        if self.config == None:
+        if self.config is None:
             try:
 
                 self.config = ConfigObj(self.configfile)
@@ -250,17 +256,19 @@ class Script(object):
         self.init_logs()
 
         self.odooargs = []
-        if odoo != False and self.config is not None:
+        if odoo is not False and self.config is not None:
 
             self.dbname = self.getConfigValue("db_name")
 
-            if self.dbname is not None and odoo != False:
+            if self.dbname is not None and odoo is not False:
                 self.logger.info("CONNECTING TO DB : " + self.dbname)
 
-            if odoo != False and self.config is not None:
+            if odoo is not False and self.config is not None:
                 self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
                 self.odooargs.append("-d" + self.dbname)
-                self.odooargs.append("--db_host=" + self.getConfigValue("db_host"))
+                self.odooargs.append(
+                    "--db_host=" + self.getConfigValue("db_host")
+                )
                 self.odooargs.append("-r" + self.getConfigValue("db_username"))
                 self.odooargs.append("-w" + self.getConfigValue("db_password"))
 
@@ -273,7 +281,9 @@ class Script(object):
                 odoo.modules.load_modules(registry)
                 self.cr = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cr, uid, {})["res.users"].context_get()
+                ctx = odoo.api.Environment(self.cr, uid, {})[
+                    "res.users"
+                ].context_get()
                 self.env = odoo.api.Environment(self.cr, uid, ctx)
 
                 self.run()
@@ -282,7 +292,9 @@ class Script(object):
                 self.cr.close()
 
         else:
-            self.logger.error("NO DB NAME given or No Odoo installation provided")
+            self.logger.error(
+                "NO DB NAME given or No Odoo installation provided"
+            )
 
     # *************************************************************************
     # Main Processing Method

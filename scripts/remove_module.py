@@ -34,7 +34,6 @@ class upgrade_all_modules(OdooScript.Script):
                 if db_usr and db_pwd:
                     self.odooargs.append("-r%s" % db_usr)
                     self.odooargs.append("-w%s" % db_pwd)
-                self.odooargs.append("--update=all")
 
             config.parse_config(self.odooargs)
 
@@ -42,6 +41,9 @@ class upgrade_all_modules(OdooScript.Script):
 
             with odoo.api.Environment.manage():
                 registry = odoo.registry(self.dbname)
+
+                # update list of modules to uninstall
+
                 odoo.modules.load_modules(registry)
                 self.cr = registry.cursor()
                 uid = odoo.SUPERUSER_ID

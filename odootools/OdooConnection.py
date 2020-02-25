@@ -30,7 +30,11 @@ except Exception:
 
 # *****************************
 # CONSTANTS
-ALL_INSTANCES_FILTER = (u"|", (u"active", u"=", True), (u"active", u"!=", True))
+ALL_INSTANCES_FILTER = (
+    u"|",
+    (u"active", u"=", True),
+    (u"active", u"!=", True),
+)
 
 ODOO_DATE_FMT = "%Y-%m-%d %H:%M:%S"  # '2018-03-01 11:50:17'
 
@@ -82,10 +86,14 @@ class Connection(object):
         # establish xmlrpc link
         # http://www.odoo.com/documentation/9.0/api_integration.html
 
-        dbproxy = xmlrpclib.ServerProxy("{}/xmlrpc/db".format(url), allow_none=True)
+        dbproxy = xmlrpclib.ServerProxy(
+            "{}/xmlrpc/db".format(url), allow_none=True
+        )
 
         self.srv_ver = float(dbproxy.server_version().split("-")[0])
-        self.logger.info(" Connected to odoo server version %s" % str(self.srv_ver))
+        self.logger.info(
+            " Connected to odoo server version %s" % str(self.srv_ver)
+        )
 
         if self.srv_ver > 8.0:
             common = xmlrpclib.ServerProxy(
@@ -104,7 +112,9 @@ class Connection(object):
 
         lang = self.context.getConfigValue("language")
         if lang is not None:
-            self.odoo_context = {"lang": self.context.getConfigValue("language")}
+            self.odoo_context = {
+                "lang": self.context.getConfigValue("language")
+            }
         else:
             self.odoo_context = {"lang": "fr_FR"}
 
@@ -147,7 +157,8 @@ class Connection(object):
             ldsn = self.context.getConfigValue("db_host") + ":5432"
             if self.context.getConfigValue("db_local") == "1":
                 return pgdb.connect(
-                    database=db_name, user=self.context.getConfigValue("db_username")
+                    database=db_name,
+                    user=self.context.getConfigValue("db_username"),
                 )
             else:
                 if self.context.getConfigValue("db_password") is not None:
@@ -178,14 +189,16 @@ class Connection(object):
         can_be_archived=False,
     ):
         obj_id = None
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             if can_be_archived:
                 full_search = copy.copy(search_criteria)
                 for val in ALL_INSTANCES_FILTER:
                     full_search.append(val)
-                found = self.odoo_search(model_name, full_search, [0, 0, False, False])
+                found = self.odoo_search(
+                    model_name, full_search, [0, 0, False, False]
+                )
             else:
 
                 found = self.odoo_search(
@@ -262,7 +275,7 @@ class Connection(object):
     # *************************************************************
     # Search elements in odoo
     def odoo_search(self, model_name, search_conditions, result_parameters):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
 
@@ -318,7 +331,7 @@ class Connection(object):
     # *************************************************************
     # Search id of elements in odoo with language support enabled
     def odoo_idsearch(self, model_name, search_conditions):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
@@ -344,7 +357,7 @@ class Connection(object):
     # *************************************************************
     # Read elements in odoo
     def odoo_read(self, model_name, ids):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
 
         try:
@@ -376,7 +389,7 @@ class Connection(object):
     # *************************************************************
     # Update element in odoo   // Single Object
     def odoo_write(self, model_name, obj_id, values):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
@@ -406,7 +419,7 @@ class Connection(object):
     # *************************************************************
     # Create  new element in odoo   // Single Object
     def odoo_create(self, model_name, *values):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
@@ -436,7 +449,7 @@ class Connection(object):
     # *************************************************************
     # Deletes  new element in odoo
     def odoo_delete(self, model_name, obj_ids):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = False
@@ -478,7 +491,7 @@ class Connection(object):
     # *************************************************************
     # Execute stuff in odoo   // Single Object
     def odoo_execute(self, model_name, method_name, obj_ids, parameters):
-        if self.xmlrpc_uid == None:
+        if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = False

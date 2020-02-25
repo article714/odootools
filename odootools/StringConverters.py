@@ -48,13 +48,13 @@ def toDate(value):
     except Exception:
         val_date = None
 
-    if val_date == None:
+    if val_date is None:
         try:
             val_date = datetime.strptime(value, "%d/%m/%Y")
         except Exception:
             val_date = None
         try:
-            if val_date == None:
+            if val_date is None:
                 val_date = datetime.strptime(value, "%Y-%m-%d 00:00:00")
         except Exception:
             val_date = None
