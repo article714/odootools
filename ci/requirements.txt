@@ -1,0 +1,5 @@
+configobj
+pytest
+pylint
+networkx
+matplotlib

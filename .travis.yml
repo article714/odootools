@@ -45,36 +45,29 @@ env:
   # * SASS & Bootstrap-SASS
   # * Compass
 
-  matrix:
-    - LINT_CHECK="1"
-    # use this to install a standalone database to export .pot files
-    # - MAKEPOT="1"
-    # add MAKEPOT="1" to a TEST line to export .pot files from
-    # the test database after test success
-    - TESTS="1" ODOO_REPO="odoo/odoo" LINT_CHECK="0"
-    - TESTS="1" ODOO_REPO="OCA/OCB" LINT_CHECK="0"
-# either use the two lines above or the two below. Don't change the default if
-# it's not necessary (it is only necessary if modules in your repository can't
-# be installed in the same database. And you get a huge speed penalty in your
-# tests)
-#  - TESTS="1.0" ODOO_REPO="odoo/odoo" UNIT_TEST="1"
-#  - TESTS="1.0" ODOO_REPO="OCA/OCB" UNIT_TEST="1"
 
 install:
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
-  - export PATH=${HOME}/maintainer-quality-tools/travis:./ci/:./scripts/:./tests:./bin/${PATH}
+  - export PATH=${HOME}/maintainer-quality-tools/travis:./ci/:${PATH}
   - travis_install_nightly
+  - pip3 install -r ci/requirements.txt
 
 jobs:
   include:
 
     - env: LINT_CHECK="1"
       script:
-        - travis_run_tests
+        - pylint src/odootools/
+        - pylint scripts/
 
-    - env: TESTS="1"
+    - env: ODOO_REPO="odoo/odoo"
       script:
-        - travis_run_tests
+        - odootools_run_tests
+
+    - env: ODOO_REPO="OCA/OCB"
+      script:
+        - odootools_run_tests
+
 
 after_success:
   - travis_after_tests_success

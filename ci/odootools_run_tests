@@ -22,14 +22,16 @@ if __name__ == '__main__':
     logging.basicConfig()
     logging.getLogger().setLevel(logging.DEBUG)
 
+    # adds odoo & odootools to PATH
     odoo_path = get_server_path()
     sys.path.append(odoo_path)
+    sys.path.append("./src/")
     
     # discover tests
     loader = unittest.TestLoader()
     runner = unittest.TextTestRunner()
     suite = unittest.TestSuite()
-    for module in pkgutil.iter_modules([__package__]):
+    for module in pkgutil.iter_modules(["tests"]):
         if module.name.startswith("test"):
             mod = importlib.import_module(".{}".format(module.name), __package__)
             if "_addTestsToSuite" in dir(mod):
