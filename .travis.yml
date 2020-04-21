@@ -4,13 +4,13 @@ cache: pip
 
 python:
   # For branches <= 10.0, put `- "2.7.13"`
-  - '3.5'
+  - "3.5"
 
 addons:
   # By default postgresql-9.1 is installed but there is issue related:
   #  https://github.com/OCA/maintainer-quality-tools/issues/432#issuecomment-281580935
   # Better use higher PostgreSQL version
-  postgresql: '9.5'
+  postgresql: "9.5"
   apt:
     #    sources:
     #    Search your sources alias here:
@@ -45,7 +45,6 @@ env:
   # * SASS & Bootstrap-SASS
   # * Compass
 
-
 install:
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:./ci/:${PATH}
@@ -54,7 +53,6 @@ install:
 
 jobs:
   include:
-
     - env: LINT_CHECK="1"
       script:
         - pylint src/odootools/
@@ -62,12 +60,13 @@ jobs:
 
     - env: ODOO_REPO="odoo/odoo"
       script:
+        - chmod +x ci/odootools_run_tests
         - odootools_run_tests
 
     - env: ODOO_REPO="OCA/OCB"
       script:
+        - chmod +x ci/odootools_run_tests
         - odootools_run_tests
-
 
 after_success:
   - travis_after_tests_success
