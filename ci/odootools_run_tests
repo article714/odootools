@@ -1,7 +1,7 @@
 
+#!/usr/bin/python3
 import logging
 import os
-import subprocess
 import sys
 import unittest
 import pkgutil
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     odoo_path = get_server_path()
     sys.path.append(odoo_path)
     sys.path.append("./src/")
-    
+
     # discover tests
     loader = unittest.TestLoader()
     runner = unittest.TextTestRunner()
