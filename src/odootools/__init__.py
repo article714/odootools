@@ -10,12 +10,12 @@ Module to manipulate data in Odoo via XML-RPC or embedded in a script
 """
 
 import logging
-from . import StringConverters
+from sys import exit
 
 try:
     from . import Converters
     from . import OdooConnection
     from . import OdooScript
-except Exception:
+except (ModuleNotFoundError, ImportError):
     logging.error("error on Odoo import")
-    exit
+    exit(1)

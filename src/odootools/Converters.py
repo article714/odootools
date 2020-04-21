@@ -13,10 +13,12 @@ Utility functions to convert data
 
 from datetime import date, datetime
 
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from odoo.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+)
 
 from .StringConverters import toString
-
 
 # -------------------------------------------------------------------------------------
 # CONSTANTS

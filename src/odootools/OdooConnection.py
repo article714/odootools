@@ -30,7 +30,11 @@ except Exception:
 
 # *****************************
 # CONSTANTS
-ALL_INSTANCES_FILTER = (u"|", (u"active", u"=", True), (u"active", u"!=", True))
+ALL_INSTANCES_FILTER = (
+    u"|",
+    (u"active", u"=", True),
+    (u"active", u"!=", True),
+)
 
 ODOO_DATE_FMT = "%Y-%m-%d %H:%M:%S"  # '2018-03-01 11:50:17'
 
@@ -82,10 +86,14 @@ class Connection(object):
         # establish xmlrpc link
         # http://www.odoo.com/documentation/9.0/api_integration.html
 
-        dbproxy = xmlrpclib.ServerProxy("{}/xmlrpc/db".format(url), allow_none=True)
+        dbproxy = xmlrpclib.ServerProxy(
+            "{}/xmlrpc/db".format(url), allow_none=True
+        )
 
         self.srv_ver = float(dbproxy.server_version().split("-")[0])
-        self.logger.info(" Connected to odoo server version %s" % str(self.srv_ver))
+        self.logger.info(
+            " Connected to odoo server version %s" % str(self.srv_ver)
+        )
 
         if self.srv_ver > 8.0:
             common = xmlrpclib.ServerProxy(
@@ -97,14 +105,16 @@ class Connection(object):
             )
 
         try:
-            v = common.version()
+            common.version()
         except Exception as e:
             self.logger.exception("Paf! %s" % str(e))
             return None
 
         lang = self.context.getConfigValue("language")
         if lang is not None:
-            self.odoo_context = {"lang": self.context.getConfigValue("language")}
+            self.odoo_context = {
+                "lang": self.context.getConfigValue("language")
+            }
         else:
             self.odoo_context = {"lang": "fr_FR"}
 
@@ -126,8 +136,8 @@ class Connection(object):
 
         if not uid:
             print(
-                "ERROR: Not able to connect to Odoo with given information, username: "
-                + odoo_username
+                "ERROR: Not able to connect to Odoo with given information"
+                ", username: " + odoo_username
             )
             sys.exit(1)
 
@@ -147,7 +157,8 @@ class Connection(object):
             ldsn = self.context.getConfigValue("db_host") + ":5432"
             if self.context.getConfigValue("db_local") == "1":
                 return pgdb.connect(
-                    database=db_name, user=self.context.getConfigValue("db_username")
+                    database=db_name,
+                    user=self.context.getConfigValue("db_username"),
                 )
             else:
                 if self.context.getConfigValue("db_password") is not None:
@@ -185,7 +196,9 @@ class Connection(object):
                 full_search = copy.copy(search_criteria)
                 for val in ALL_INSTANCES_FILTER:
                     full_search.append(val)
-                found = self.odoo_search(model_name, full_search, [0, 0, False, False])
+                found = self.odoo_search(
+                    model_name, full_search, [0, 0, False, False]
+                )
             else:
 
                 found = self.odoo_search(
@@ -219,7 +232,7 @@ class Connection(object):
                 obj_id = found[0]["id"]
                 try:
                     if not create_only:
-                        result = self.xmlrpc_models.execute_kw(
+                        self.xmlrpc_models.execute_kw(
                             self.context.getConfigValue("db_name"),
                             self.xmlrpc_uid,
                             self.context.getConfigValue("odoo_password"),
@@ -251,7 +264,7 @@ class Connection(object):
 
         except Exception as e:
             self.logger.error(
-                "WARNING Error when looking for or writing a record for model: "
+                "WARN Error when looking for or writing a record for model: "
                 + model_name
                 + " [ "
                 + toString(values)
@@ -306,7 +319,7 @@ class Connection(object):
                 else:
                     return ()
 
-        except xmlrpclib.Fault as e:
+        except xmlrpclib.Fault:
             logging.exception(
                 "WARNING: error when searching for object: "
                 + model_name
@@ -332,7 +345,7 @@ class Connection(object):
             )
 
             return result
-        except xmlrpclib.Fault as e:
+        except xmlrpclib.Fault:
             logging.exception(
                 "     WARNING: error when searching for object: "
                 + model_name

@@ -45,7 +45,8 @@ FORMAT_FIC = "%(asctime)s - %(levelname)s - %(message)s"
 
 class Script(object):
     """
-    A generic Class to capitalize technical stuffs and ease the writings of scripts for Odoo
+    A generic Class to capitalize technical stuffs and ease the writings
+    of scripts for Odoo
     """
 
     config = None

@@ -1,0 +1,13 @@
+{
+    "python.pythonPath": "/home/xtof/.virtualenvs/odoo12/bin/python3",
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "79"
+    ],
+    "python.formatting.autopep8Args": [
+        "--max-line-length",
+        "79",
+        "--experimental"
+    ],
+    "python.formatting.provider": "black",
+}

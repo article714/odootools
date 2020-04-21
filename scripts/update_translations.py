@@ -4,7 +4,7 @@
 import contextlib
 import cStringIO
 
-from odoo import _, fields, models, tools
+from odoo import _, tools
 from odoo.exceptions import UserError
 from odootools import OdooScript
 
@@ -28,12 +28,14 @@ class UpdateTranslations(OdooScript.Script):
     def run(self):
 
         languages = self.get_languages()
-        self.logger.warning(u"Will reload all following languages: %s", str(languages))
+        self.logger.warning(
+            u"Will reload all following languages: %s", str(languages)
+        )
 
         for lang_inst in languages:
             lang_code = lang_inst[0]
             lang_name = self.get_lang_name(lang_code)
-            lang = self.env["res.lang"].browse(lang_inst[2])
+            self.env["res.lang"].browse(lang_inst[2])
 
             # Synchronize
             with contextlib.closing(cStringIO.StringIO()) as buf:
@@ -45,7 +47,9 @@ class UpdateTranslations(OdooScript.Script):
 
             # Reload with override
             self.logger.warning(u"Reloading for : %s", lang_name)
-            mods = self.env["ir.module.module"].search([("state", "=", "installed")])
+            mods = self.env["ir.module.module"].search(
+                [("state", "=", "installed")]
+            )
             mods.with_context(overwrite=True).update_translations(lang_code)
 
         self.cr.commit()
