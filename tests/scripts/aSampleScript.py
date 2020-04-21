@@ -16,7 +16,7 @@ from odootools import odooscript
 
 
 @pytest.mark.skipif(True, reason="Not a test class")
-class SampleScript(odooscript.Script):
+class SampleScript(odooscript.AbstractOdooScript):
     """
     A simple script used for unit testing
     """

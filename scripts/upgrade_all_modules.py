@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import odoo
 from odoo.tools import config
 from odootools import odooscript
 
 
-class UpgradeAllModules(odooscript.Script):
+class UpgradeAllModules(odooscript.AbstractOdooScript):
 
     # ***********************************
     # Main
@@ -45,17 +44,17 @@ class UpgradeAllModules(odooscript.Script):
             with odoo.api.Environment.manage():
                 registry = odoo.registry(self.dbname)
                 odoo.modules.load_modules(registry)
-                self.cr = registry.cursor()
+                self.cursor = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cr, uid, {})[
+                ctx = odoo.api.Environment(self.cursor, uid, {})[
                     "res.users"
                 ].context_get()
-                self.env = odoo.api.Environment(self.cr, uid, ctx)
+                self.env = odoo.api.Environment(self.cursor, uid, ctx)
 
                 self.logger.warn("FINISHING UPGRADE" + self.dbname)
 
-                self.cr.commit()
-                self.cr.close()
+                self.cursor.commit()
+                self.cursor.close()
 
         else:
             self.logger.error(

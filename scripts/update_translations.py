@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import contextlib
 import cStringIO
@@ -9,7 +8,7 @@ from odoo.exceptions import UserError
 from odootools import odooscript
 
 
-class UpdateTranslations(odooscript.Script):
+class UpdateTranslations(odooscript.AbstractOdooScript):
     def get_languages(self):
         langs = self.env["res.lang"].search(
             [("active", "=", True), ("translatable", "=", True)]
@@ -40,9 +39,9 @@ class UpdateTranslations(odooscript.Script):
             # Synchronize
             with contextlib.closing(cStringIO.StringIO()) as buf:
                 self.logger.warning(u"Synchronizing for : %s", lang_name)
-                tools.trans_export(lang_code, ["all"], buf, "csv", self.cr)
+                tools.trans_export(lang_code, ["all"], buf, "csv", self.cursor)
                 tools.trans_load_data(
-                    self.cr, buf, "csv", lang_code, lang_name=lang_name
+                    self.cursor, buf, "csv", lang_code, lang_name=lang_name
                 )
 
             # Reload with override
@@ -52,7 +51,7 @@ class UpdateTranslations(odooscript.Script):
             )
             mods.with_context(overwrite=True).update_translations(lang_code)
 
-        self.cr.commit()
+        self.cursor.commit()
 
 
 # *******************************************************

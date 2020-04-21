@@ -19,7 +19,7 @@ except (ModuleNotFoundError, ImportError):
     sysexit(1)
 
 
-class BuildDependencyGraph(odooscript.Script):
+class BuildDependencyGraph(odooscript.AbstractOdooScript):
 
     # ***********************************
     # Main

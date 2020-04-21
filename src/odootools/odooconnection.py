@@ -40,8 +40,10 @@ ODOO_DATE_FMT = "%Y-%m-%d %H:%M:%S"  # '2018-03-01 11:50:17'
 
 
 # *****************************
-# Main Classes
 class Connection(object):
+    """
+    Abstraction for a Connection to an distant Odoo server
+    """
 
     # *************************************************************
     # constructor

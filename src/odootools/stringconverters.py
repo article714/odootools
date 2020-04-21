@@ -20,8 +20,10 @@ XLS_DATE_REF = date(1900, 1, 1)
 
 
 # -------------------------------------------------------------------------------------
-#  Utility: Transfo des chaines en unicode
 def to_string(value):
+    """
+    Utility: Transfo des chaines en unicode
+    """
     avalue = ""
     if isinstance(value, str):
         avalue = value
@@ -35,11 +37,10 @@ def to_string(value):
 
 
 # -------------------------------------------------------------------------------------
-#  Utility: Transfo de chaine en date
-
-
 def to_date(value):
-
+    """
+    Utility: Transfo de chaine en date
+    """
     val_date = None
 
     try:

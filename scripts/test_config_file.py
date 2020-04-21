@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 
 import odooscript
 
 
-class TestConfigFile(odooscript.Script):
+class TestConfigFile(odooscript.AbstractOdooScript):
     def run(self):
 
         odoo_host = self.get_config_value("odoo_host")

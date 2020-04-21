@@ -144,7 +144,8 @@ disable=print-statement,
         unnecessary-utf8-coding-comment,
         missing-newline-extrafiles,
         bad-continuation,
-        invalid-commit
+        invalid-commit,
+        no-utf8-coding-comment
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

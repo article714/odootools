@@ -1,12 +1,11 @@
 #!/usr/bin/env python
-# # -*- coding: utf-8 -*-
 
 import odoo
 from odoo.tools import config
 from odootools import odooscript
 
 
-class RemoveModuleScript(odooscript.Script):
+class RemoveModuleScript(odooscript.AbstractOdooScript):
 
     # ***********************************
     # Main
@@ -47,17 +46,17 @@ class RemoveModuleScript(odooscript.Script):
                 # update list of modules to uninstall
 
                 odoo.modules.load_modules(registry)
-                self.cr = registry.cursor()
+                self.cursor = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cr, uid, {})[
+                ctx = odoo.api.Environment(self.cursor, uid, {})[
                     "res.users"
                 ].context_get()
-                self.env = odoo.api.Environment(self.cr, uid, ctx)
+                self.env = odoo.api.Environment(self.cursor, uid, ctx)
 
                 self.logger.warn("FINISHING UPGRADE" + self.dbname)
 
-                self.cr.commit()
-                self.cr.close()
+                self.cursor.commit()
+                self.cursor.close()
 
         else:
             self.logger.error(
