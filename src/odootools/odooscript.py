@@ -16,7 +16,7 @@ import os.path
 import sys
 from abc import ABCMeta, abstractmethod
 
-from configobj import ConfigObj
+from configobj import ConfigObj, ConfigObjError
 
 from . import odooconnection
 
@@ -31,7 +31,7 @@ except (ModuleNotFoundError, ImportError):
 try:
     from odoo.tools import config
 except (ModuleNotFoundError, ImportError):
-    config = False
+    ODOO_OK = False
 
 # ************************************************
 #  CONSTANTS
@@ -44,13 +44,13 @@ FORMAT_FIC = "%(asctime)s - %(levelname)s - %(message)s"
 # Odoo Script
 
 
-class AbstractOdooScript(metaclass=ABCMeta):
+class AbstractOdooScript(
+    metaclass=ABCMeta
+):  # pylint: disable=too-many-instance-attributes
     """
     A generic Class to capitalize technical stuffs and ease the writings
     of scripts for Odoo
     """
-
-    config = None
 
     # *************************************************************
     # Constructor, passing arguments from the command line
@@ -227,7 +227,7 @@ class AbstractOdooScript(metaclass=ABCMeta):
             try:
 
                 self.config = ConfigObj(self.configfile)
-            except Exception:
+            except ConfigObjError:
                 self.logger.error(
                     "ERROR: Cannot parse config file, syntax error (%s)",
                     self.configfile,

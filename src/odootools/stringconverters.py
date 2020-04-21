@@ -64,9 +64,10 @@ def to_date(value):
 
 
 # -------------------------------------------------------------------------------------
-#  Utility: Transfo de valeur en float
 def to_float(value):
-
+    """"
+    Utility: Transfo de valeur en float
+    """"
     try:
         val = float(value)
     except ValueError:
