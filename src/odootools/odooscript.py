@@ -11,20 +11,20 @@ Utility functions to convert data
 @license: AGPL
 """
 
-from configobj import ConfigObj
 import datetime
 import getopt
 import logging
 import os.path
 import sys
 
-from . import OdooConnection
+from configobj import ConfigObj
 
+from . import odooconnection
 
 try:
     import odoo
 except Exception:
-    odoo = False
+    odoo = None
     logging.error("error on Odoo import")
 
 try:
@@ -54,7 +54,7 @@ class Script(object):
     # *************************************************************
     # Constructor, passing arguments from the command line
 
-    def __init__(self, parseConfig=True):
+    def __init__(self, parse_config=True):
         """
         Constructor that uses command line arguments to build a config object
         """
@@ -62,7 +62,7 @@ class Script(object):
         if len(sys.argv) > 1:
             self.name = os.path.basename(sys.argv[0]).replace(".py", "")
         else:
-            self.name = "Generic OdooScript script"
+            self.name = "Generic odooscript script"
 
         # ******
         # Basic Logging configuration
@@ -87,12 +87,14 @@ class Script(object):
                 sys.argv[1:], "hc:", ["config="]
             )
         except getopt.GetoptError:
-            print("USAGE : \n\t %s.py -c <configfile>" % (self.name,))
+            self.logger.error("USAGE : \n\t %s.py -c <configfile>", self.name)
             sys.exit(2)
 
         for opt, arg in opts:
             if opt == "-h":
-                print(self.name + " -c <configfile>")
+                print(
+                    self.name + " -c <configfile>"
+                )  # pylint: disable=print-used
                 sys.exit()
             elif opt in ("-c", "--config"):
                 self.configfile = arg
@@ -103,16 +105,16 @@ class Script(object):
         # config parsing
 
         self.configParsed = False
-        if parseConfig:
+        if parse_config:
             # Parses configuration only if not yet done
-            self.parseConfig()
+            self.parse_config()
 
         # *************************************************************
         # Odoo related variables (connection or embedded)
         #
 
-        if parseConfig:
-            self.dbname = self.getConfigValue("db_name")
+        if parse_config:
+            self.dbname = self.get_config_value("db_name")
         self.odooConn = None
         self.env = None
         self.cr = None
@@ -121,16 +123,17 @@ class Script(object):
         self.odooargs = odooargs
 
     # *************************************************************
-    # Log file configuration
-
     def init_logs(self):
+        """
+        Log file configuration
+        """
 
-        INTERACTIVE = False
-        DEBUG = False
+        interactive = False
+        debug = False
 
         if self.config is not None:
-            INTERACTIVE = self.config.get("INTERACTIVE", 0) == "1"
-            DEBUG = self.config.get("DEBUG", 0) == "1"
+            interactive = self.config.get("INTERACTIVE", 0) == "1"
+            debug = self.config.get("DEBUG", 0) == "1"
 
         if self.logger is not None:
             if self.logger_ch is not None:
@@ -156,7 +159,7 @@ class Script(object):
         self.logger.addHandler(ch)
 
         # fichier de log
-        output_dir = self.getConfigValue("output_directory")
+        output_dir = self.get_config_value("output_directory")
         fh = None
         if output_dir is not None:
             logpath = output_dir + os.path.sep
@@ -172,16 +175,16 @@ class Script(object):
             self.logger.addHandler(fh)
         else:
             self.logger.error(
-                "Not able to find output_directory %s" % (str(output_dir),)
+                "Not able to find output_directory %s", str(output_dir)
             )
         self.logger_fh = fh
 
-        if DEBUG:
+        if debug:
             self.logger.setLevel(logging.INFO)
             ch.setLevel(logging.DEBUG)
             if fh:
                 fh.setLevel(logging.DEBUG)
-        elif INTERACTIVE:
+        elif interactive:
             self.logger.setLevel(logging.WARNING)
             ch.setLevel(logging.INFO)
             if fh:
@@ -193,33 +196,35 @@ class Script(object):
                 fh.setLevel(logging.ERROR)
 
     # *************************************************************
-    # Utils to get values from config
-    def getConfigValue(self, name, default=None):
+    def get_config_value(self, name, default=None):
+        """
+        Utils to get values from config
+        """
         if self.config is not None:
             return self.config.get(name, default)
         else:
             return None
 
     # *************************************************************
-    # parse config args and files
-
-    def parseConfig(self, aConfigfile=None):
+    def parse_config(self, aConfigfile=None):
+        """
+        parse config args and files
+        """
 
         if aConfigfile is not None:
             self.configfile = aConfigfile
 
         if self.configfile is None:
-            self.logger.error("USAGE : \n\t" + self.name + " -c <configfile>")
+            self.logger.error("USAGE : \n\t %s -c <configfile>", self.name)
             sys.exit(1)
 
         if not os.path.isfile(self.configfile):
             self.logger.error(
                 "ERROR: Given Config file is not a file or path "
-                "is not correct : %s\n" % (str(self.configfile),)
+                "is not correct : %s\n",
+                str(self.configfile),
             )
-            self.logger.error(
-                "USAGE: \n\t %s.py -c <configfile>" % (self.name,)
-            )
+            self.logger.error("USAGE: \n\t %s.py -c <configfile>", self.name)
             self.config = None
 
         if self.config is None:
@@ -227,51 +232,57 @@ class Script(object):
 
                 self.config = ConfigObj(self.configfile)
             except Exception:
-                print(
-                    "ERROR: Cannot parse config file, syntax error (%s)"
-                    % (self.configfile,)
+                self.logger.error(
+                    "ERROR: Cannot parse config file, syntax error (%s)",
+                    self.configfile,
                 )
-                return None
         else:
             self.logger.warning("Configuration has already been processed")
 
     # *************************************************************************
-    # Exectute main self script after connecting to an actual odoo Server
-
-    def runWithRemoteOdoo(self):
+    def run_with_remote_odoo(self):
+        """
+        Execute main self script after connecting to an actual odoo Server
+        """
 
         self.init_logs()
 
         # ******************************************************************
         # Gets Connections
 
-        self.odooConn = OdooConnection.Connection(self)
+        self.odooConn = odooconnection.Connection(self)
         self.odooConn.getXMLRPCConnection()
         self.run()
 
     # *************************************************************************
-    # Exectute main self script after starting an embedded Odoo Server
-
-    def runInOdooContext(self):
-
+    def run_in_odoo_context(self):
+        """
+        Execute main self script after starting an embedded Odoo Server
+        """
         self.init_logs()
 
         self.odooargs = []
         if odoo is not False and self.config is not None:
 
-            self.dbname = self.getConfigValue("db_name")
+            self.dbname = self.get_config_value("db_name")
 
             if self.dbname is not None and odoo is not False:
-                self.logger.info("CONNECTING TO DB : " + self.dbname)
+                self.logger.info("CONNECTING TO DB : %s", {self.dbname})
 
             if odoo is not False and self.config is not None:
-                self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
+                self.odooargs.append(
+                    "-c" + self.get_config_value("odoo_config")
+                )
                 self.odooargs.append("-d" + self.dbname)
                 self.odooargs.append(
-                    "--db_host=" + self.getConfigValue("db_host")
+                    "--db_host=" + self.get_config_value("db_host")
                 )
-                self.odooargs.append("-r" + self.getConfigValue("db_username"))
-                self.odooargs.append("-w" + self.getConfigValue("db_password"))
+                self.odooargs.append(
+                    "-r" + self.get_config_value("db_username")
+                )
+                self.odooargs.append(
+                    "-w" + self.get_config_value("db_password")
+                )
 
             config.parse_config(self.odooargs)
 
@@ -297,12 +308,15 @@ class Script(object):
                 "NO DB NAME given or No Odoo installation provided"
             )
 
-    # *************************************************************************
-    # Main Processing Method
-
+    # ************************************************************************
     def run(self):
+        """
+        Main Processing Method
+        """
 
         # ******************************************************************
         # Gets Connection
 
-        print("Default implementation does nothing")
+        self.logger.warning(
+            "Default implementation does nothing in %s", self.name
+        )

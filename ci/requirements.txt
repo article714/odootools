@@ -1,5 +1,5 @@
-configobj
 pytest
 pylint
+pylint-odoo
 networkx
 matplotlib

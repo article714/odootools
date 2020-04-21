@@ -15,7 +15,7 @@ from os.path import sep
 import sys
 import unittest
 
-from odootools import OdooConnection
+from odootools import odooconnection
 from .scripts.aSampleScript import SampleScript
 
 
@@ -24,24 +24,32 @@ class TestOdooConn(unittest.TestCase):
         """Test Init"""
         sys.argv = ["testing"]
         self.innerScript = SampleScript()
-        self.innerScript.parseConfig(
+        self.innerScript.parse_config(
             aConfigfile="test%setc%stestScript.config" % (sep, sep)
         )
 
-        self.odooConn = OdooConnection.Connection(self.innerScript)
+        self.odooConn = odooconnection.Connection(self.innerScript)
 
     def test_conn(self):
-        self.assertIsNotNone(self.odooConn, "Failed to create connection object")
+        self.assertIsNotNone(
+            self.odooConn, "Failed to create connection object"
+        )
         self.odooxmlrpc = self.odooConn.getXMLRPCConnection()
         self.assertIsNotNone(self.odooxmlrpc, "Failed to init connection")
 
     def test_odoo_search(self):
-        self.assertIsNotNone(self.odooConn, "Failed to create connection object")
-        found = self.odooConn.odoo_idsearch("res.partner", [("is_company", "=", True)])
+        self.assertIsNotNone(
+            self.odooConn, "Failed to create connection object"
+        )
+        found = self.odooConn.odoo_idsearch(
+            "res.partner", [("is_company", "=", True)]
+        )
         self.assertGreater(len(found), 0, "No partner found, issue!")
 
     def test_odoo_search_create_or_write(self):
-        self.assertIsNotNone(self.odooConn, "Failed to create connection object")
+        self.assertIsNotNone(
+            self.odooConn, "Failed to create connection object"
+        )
         found = self.odooConn.odoo_search_create_or_write(
             "res.partner",
             [("name", "=", "Someone who cares")],
@@ -58,7 +66,9 @@ class TestOdooConn(unittest.TestCase):
         self.assertGreater(found, 0, "No partner found, issue!")
 
     def test_odoo_search_delete(self):
-        self.assertIsNotNone(self.odooConn, "Failed to create connection object")
+        self.assertIsNotNone(
+            self.odooConn, "Failed to create connection object"
+        )
         found = self.odooConn.odoo_idsearch(
             "res.partner", [("name", "=", "Someone who cares")]
         )

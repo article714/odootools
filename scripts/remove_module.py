@@ -3,10 +3,10 @@
 
 import odoo
 from odoo.tools import config
-from odootools import OdooScript
+from odootools import odooscript
 
 
-class RemoveModuleScript(OdooScript.Script):
+class RemoveModuleScript(odooscript.Script):
 
     # ***********************************
     # Main
@@ -18,16 +18,18 @@ class RemoveModuleScript(OdooScript.Script):
         self.odooargs = []
         if odoo is not False and self.config is not None:
 
-            self.dbname = self.getConfigValue("db_name")
-            db_host = self.getConfigValue("db_host")
-            db_usr = self.getConfigValue("db_username")
-            db_pwd = self.getConfigValue("db_password")
+            self.dbname = self.get_config_value("db_name")
+            db_host = self.get_config_value("db_host")
+            db_usr = self.get_config_value("db_username")
+            db_pwd = self.get_config_value("db_password")
 
             if self.dbname is not None and odoo is not False:
                 self.logger.info("CONNECTING TO DB : " + self.dbname)
 
             if odoo is not False and self.config is not None:
-                self.odooargs.append("-c" + self.getConfigValue("odoo_config"))
+                self.odooargs.append(
+                    "-c" + self.get_config_value("odoo_config")
+                )
                 self.odooargs.append("-d" + self.dbname)
                 if db_host:
                     self.odooargs.append("--db_host=%s" % db_host)

@@ -12,11 +12,11 @@ Script used to unittest stuff
 
 import pytest
 
-from odootools import OdooScript
+from odootools import odooscript
 
 
 @pytest.mark.skipif(True, reason="Not a test class")
-class SampleScript(OdooScript.Script):
+class SampleScript(odooscript.Script):
     """
     A simple script used for unit testing
     """
@@ -25,4 +25,4 @@ class SampleScript(OdooScript.Script):
         """
         Constructor
         """
-        super(SampleScript, self).__init__(parseConfig=False)
+        super(SampleScript, self).__init__(parse_config=False)

@@ -18,7 +18,7 @@ from odoo.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
 )
 
-from .StringConverters import toString
+from .stringconverters import to_string
 
 # -------------------------------------------------------------------------------------
 # CONSTANTS
@@ -26,13 +26,12 @@ XLS_DATE_REF = date(1900, 1, 1)
 
 
 # -------------------------------------------------------------------------------------
-#  Utility: Transfo de chaine en date
-
-
-def dateToOdooString(val):
+def date_to_odoo_string(val):
+    """"
+    Utility: translate date to an Odoo compatible string
+    """
     if isinstance(val, datetime):
         return val.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-    elif isinstance(val, date):
+    if isinstance(val, date):
         return val.strftime(DEFAULT_SERVER_DATE_FORMAT)
-    else:
-        return toString(val)
+    return to_string(val)

@@ -49,14 +49,16 @@ install:
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:./ci/:${PATH}
   - travis_install_nightly
+  - pip3 install -r requirements.txt
   - pip3 install -r ci/requirements.txt
 
 jobs:
   include:
     - env: LINT_CHECK="1"
       script:
-        - pylint src/odootools/
-        - pylint scripts/
+        - pylint --rcfile=ci/pylint-rc src/odootools/
+        - pylint --rcfile=ci/pylint-rc scripts/
+        - pylint --rcfile=ci/pylint-rc tests/
 
     - env: ODOO_REPO="odoo/odoo"
       script:

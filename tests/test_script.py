@@ -26,11 +26,11 @@ class TestOdooScript(unittest.TestCase):
         self.innerScript = SampleScript()
 
     def test_parse_config(self):
-        self.innerScript.parseConfig(
+        self.innerScript.parse_config(
             aConfigfile="test%setc%stestScript.config" % (sep, sep)
         )
         self.assertEquals(
-            self.innerScript.getConfigValue("language"),
+            self.innerScript.get_config_value("language"),
             "fr_FR",
             "Unable to parse config",
         )

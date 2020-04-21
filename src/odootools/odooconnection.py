@@ -16,7 +16,7 @@ import logging
 import sys
 import xmlrpc.client as xmlrpclib
 
-from .StringConverters import toString
+from .stringconverters import to_string
 
 
 try:
@@ -45,7 +45,7 @@ class Connection(object):
 
     # *************************************************************
     # constructor
-    # parameter script must be an instance of OdooScript
+    # parameter script must be an instance of odooscript
     def __init__(self, ctx):
         self.context = ctx
         # xmlrpc connection
@@ -65,8 +65,8 @@ class Connection(object):
         if self.xmlrpc_uid is not None:
             return (self.xmlrpc_uid, self.xmlrpc_models)
 
-        odoo_host = self.context.getConfigValue("odoo_host")
-        odoo_port = self.context.getConfigValue("odoo_port")
+        odoo_host = self.context.get_config_value("odoo_host")
+        odoo_port = self.context.get_config_value("odoo_port")
         if odoo_host is not None and odoo_port is not None:
             if odoo_port == "443":
                 url = "https://" + odoo_host
@@ -75,9 +75,9 @@ class Connection(object):
                     "http://"
                     + odoo_host
                     + ":"
-                    + self.context.getConfigValue("odoo_port")
+                    + self.context.get_config_value("odoo_port")
                 )
-            odoo_username = self.context.getConfigValue("odoo_username")
+            odoo_username = self.context.get_config_value("odoo_username")
         else:
             self.logger.error("no connection information provided")
             return None
@@ -110,18 +110,18 @@ class Connection(object):
             self.logger.exception("Paf! %s" % str(e))
             return None
 
-        lang = self.context.getConfigValue("language")
+        lang = self.context.get_config_value("language")
         if lang is not None:
             self.odoo_context = {
-                "lang": self.context.getConfigValue("language")
+                "lang": self.context.get_config_value("language")
             }
         else:
             self.odoo_context = {"lang": "fr_FR"}
 
         uid = common.authenticate(
-            self.context.getConfigValue("db_name"),
-            self.context.getConfigValue("odoo_username"),
-            self.context.getConfigValue("odoo_password"),
+            self.context.get_config_value("db_name"),
+            self.context.get_config_value("odoo_username"),
+            self.context.get_config_value("odoo_password"),
             self.odoo_context,
         )
 
@@ -149,30 +149,30 @@ class Connection(object):
     # *************************************************************
     # gets a New Postgresql connection to odoo
     def getDBConnection(self):
-        db_name = self.context.getConfigValue("db_name")
+        db_name = self.context.get_config_value("db_name")
 
         if pgdb:
             # *************************************************************
             # connect to Db
-            ldsn = self.context.getConfigValue("db_host") + ":5432"
-            if self.context.getConfigValue("db_local") == "1":
+            ldsn = self.context.get_config_value("db_host") + ":5432"
+            if self.context.get_config_value("db_local") == "1":
                 return pgdb.connect(
                     database=db_name,
-                    user=self.context.getConfigValue("db_username"),
+                    user=self.context.get_config_value("db_username"),
                 )
             else:
-                if self.context.getConfigValue("db_password") is not None:
+                if self.context.get_config_value("db_password") is not None:
                     return pgdb.connect(
                         database=db_name,
                         dsn=ldsn,
-                        user=self.context.getConfigValue("db_username"),
-                        password=self.context.getConfigValue("db_password"),
+                        user=self.context.get_config_value("db_username"),
+                        password=self.context.get_config_value("db_password"),
                     )
                 else:
                     return pgdb.connect(
                         database=db_name,
                         dsn=ldsn,
-                        user=self.context.getConfigValue("db_username"),
+                        user=self.context.get_config_value("db_username"),
                     )
         else:
             logging.error("No PGDB module")
@@ -210,9 +210,9 @@ class Connection(object):
             if lfound == 0:
                 try:
                     obj_id = self.xmlrpc_models.execute_kw(
-                        self.context.getConfigValue("db_name"),
+                        self.context.get_config_value("db_name"),
                         self.xmlrpc_uid,
-                        self.context.getConfigValue("odoo_password"),
+                        self.context.get_config_value("odoo_password"),
                         model_name,
                         "create",
                         [values],
@@ -223,9 +223,9 @@ class Connection(object):
                         "Failed to create record "
                         + model_name
                         + " [ "
-                        + toString(values)
+                        + to_string(values)
                         + "] "
-                        + toString(e)
+                        + to_string(e)
                     )
 
             elif lfound == 1:
@@ -233,9 +233,9 @@ class Connection(object):
                 try:
                     if not create_only:
                         self.xmlrpc_models.execute_kw(
-                            self.context.getConfigValue("db_name"),
+                            self.context.get_config_value("db_name"),
                             self.xmlrpc_uid,
-                            self.context.getConfigValue("odoo_password"),
+                            self.context.get_config_value("odoo_password"),
                             model_name,
                             "write",
                             [obj_id, values],
@@ -246,11 +246,11 @@ class Connection(object):
                         "Failed to write record "
                         + model_name
                         + "("
-                        + toString(obj_id)
+                        + to_string(obj_id)
                         + ") [ "
-                        + toString(values)
+                        + to_string(values)
                         + "] "
-                        + toString(e)
+                        + to_string(e)
                     )
             else:
                 self.logger.warning(
@@ -267,9 +267,9 @@ class Connection(object):
                 "WARN Error when looking for or writing a record for model: "
                 + model_name
                 + " [ "
-                + toString(values)
+                + to_string(values)
                 + "] "
-                + toString(e)
+                + to_string(e)
             )
 
     # *************************************************************
@@ -286,9 +286,9 @@ class Connection(object):
 
             if self.srv_ver > 8.0:
                 result = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     "search_read",
                     [search_conditions],
@@ -297,9 +297,9 @@ class Connection(object):
                 return result
             else:
                 found = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     "search",
                     [search_conditions],
@@ -307,9 +307,9 @@ class Connection(object):
                 )
                 if len(found) > 0:
                     result = self.xmlrpc_models.execute_kw(
-                        self.context.getConfigValue("db_name"),
+                        self.context.get_config_value("db_name"),
                         self.xmlrpc_uid,
-                        self.context.getConfigValue("odoo_password"),
+                        self.context.get_config_value("odoo_password"),
                         model_name,
                         "read",
                         [found],
@@ -335,9 +335,9 @@ class Connection(object):
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
-                self.context.getConfigValue("db_name"),
+                self.context.get_config_value("db_name"),
                 self.xmlrpc_uid,
-                self.context.getConfigValue("odoo_password"),
+                self.context.get_config_value("odoo_password"),
                 model_name,
                 "search",
                 [search_conditions],
@@ -362,9 +362,9 @@ class Connection(object):
 
         try:
             result = self.xmlrpc_models.execute_kw(
-                self.context.getConfigValue("db_name"),
+                self.context.get_config_value("db_name"),
                 self.xmlrpc_uid,
-                self.context.getConfigValue("odoo_password"),
+                self.context.get_config_value("odoo_password"),
                 model_name,
                 "read",
                 [ids],
@@ -393,9 +393,9 @@ class Connection(object):
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
-                self.context.getConfigValue("db_name"),
+                self.context.get_config_value("db_name"),
                 self.xmlrpc_uid,
-                self.context.getConfigValue("odoo_password"),
+                self.context.get_config_value("odoo_password"),
                 model_name,
                 "write",
                 [obj_id, values],
@@ -423,9 +423,9 @@ class Connection(object):
             self.getXMLRPCConnection()
         try:
             result = self.xmlrpc_models.execute_kw(
-                self.context.getConfigValue("db_name"),
+                self.context.get_config_value("db_name"),
                 self.xmlrpc_uid,
-                self.context.getConfigValue("odoo_password"),
+                self.context.get_config_value("odoo_password"),
                 model_name,
                 "create",
                 [values],
@@ -455,9 +455,9 @@ class Connection(object):
             result = False
             if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
                 result = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     "unlink",
                     [obj_ids],
@@ -465,9 +465,9 @@ class Connection(object):
                 )
             elif isinstance(obj_ids, int):
                 result = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     "unlink",
                     [[obj_ids]],
@@ -497,9 +497,9 @@ class Connection(object):
             result = False
             if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
                 result = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     method_name,
                     [obj_ids, parameters],
@@ -507,9 +507,9 @@ class Connection(object):
                 )
             elif isinstance(obj_ids, int):
                 result = self.xmlrpc_models.execute_kw(
-                    self.context.getConfigValue("db_name"),
+                    self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
-                    self.context.getConfigValue("odoo_password"),
+                    self.context.get_config_value("odoo_password"),
                     model_name,
                     method_name,
                     [[obj_ids], parameters],

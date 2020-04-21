@@ -7,7 +7,7 @@ Utility functions to convert data
 
 
 @author: C. Guychard
-@copyright: ©2018 Article714
+@copyright: ©2018-2020 Article714
 @license: AGPL
 """
 
@@ -21,7 +21,7 @@ XLS_DATE_REF = date(1900, 1, 1)
 
 # -------------------------------------------------------------------------------------
 #  Utility: Transfo des chaines en unicode
-def toString(value):
+def to_string(value):
     avalue = ""
     if isinstance(value, str):
         avalue = value
@@ -38,7 +38,7 @@ def toString(value):
 #  Utility: Transfo de chaine en date
 
 
-def toDate(value):
+def to_date(value):
 
     val_date = None
 
@@ -64,30 +64,30 @@ def toDate(value):
 
 # -------------------------------------------------------------------------------------
 #  Utility: Transfo de valeur en float
-def toFloat(value):
+def to_float(value):
 
     try:
         val = float(value)
-    except Exception:
+    except ValueError:
         val = None
 
     return val
 
 
 # -------------------------------------------------------------------------------------
-# translate string to Int
-# None, unparseable or empty string is -1
-def toInt(s):
+def to_int(strval):
+    """
+    translate string to Int
+        None, unparseable or empty string is -1
+    """
     try:
-        if s is not None:
-            if len(s) == 0:
+        if strval is not None:
+            if not strval:
                 return -1
-            else:
-                return int(s)
-        else:
-            return -1
+            return int(strval)
+        return -1
     except ValueError:
         try:
-            return int(float(s))
+            return int(float(strval))
         except ValueError:
             return -1

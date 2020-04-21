@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 
 
-import OdooScript
+import odooscript
 
 
-class TestConfigFile(OdooScript.Script):
+class TestConfigFile(odooscript.Script):
     def run(self):
 
-        odoo_host = self.getConfigValue("odoo_host")
-        url = "http://" + odoo_host + ":" + self.getConfigValue("odoo_port")
-        db_name = self.getConfigValue("db_name")
-        db_local = self.getConfigValue("db_local")
+        odoo_host = self.get_config_value("odoo_host")
+        url = "http://" + odoo_host + ":" + self.get_config_value("odoo_port")
+        db_name = self.get_config_value("db_name")
+        db_local = self.get_config_value("db_local")
 
         print(
             "WILL USE ODOO SERVER : {}  \n \t AND DATABASE: {}   ({})".format(

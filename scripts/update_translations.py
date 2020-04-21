@@ -6,10 +6,10 @@ import cStringIO
 
 from odoo import _, tools
 from odoo.exceptions import UserError
-from odootools import OdooScript
+from odootools import odooscript
 
 
-class UpdateTranslations(OdooScript.Script):
+class UpdateTranslations(odooscript.Script):
     def get_languages(self):
         langs = self.env["res.lang"].search(
             [("active", "=", True), ("translatable", "=", True)]
@@ -61,4 +61,4 @@ class UpdateTranslations(OdooScript.Script):
 
 if __name__ == "__main__":
     script = UpdateTranslations()
-    script.runInOdooContext()
+    script.run_in_odoo_context()

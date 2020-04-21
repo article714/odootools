@@ -23,5 +23,5 @@ class TestConverters(unittest.TestCase):
         self.aDate = datetime.now()
 
     def test_date_to_string(self):
-        val = StringConverters.toString(self.aDate)
+        val = StringConverters.to_string(self.aDate)
         self.assertIsNotNone(val, "unable to translate date")
