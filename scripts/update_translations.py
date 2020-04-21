@@ -9,7 +9,7 @@ from odoo.exceptions import UserError
 from odootools import OdooScript
 
 
-class update_translations(OdooScript.Script):
+class UpdateTranslations(OdooScript.Script):
     def get_languages(self):
         langs = self.env["res.lang"].search(
             [("active", "=", True), ("translatable", "=", True)]
@@ -56,5 +56,5 @@ class update_translations(OdooScript.Script):
 
 
 if __name__ == "__main__":
-    script = update_translations()
+    script = UpdateTranslations()
     script.runInOdooContext()

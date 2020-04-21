@@ -1,0 +1,44 @@
+
+import logging
+import os
+import subprocess
+import sys
+import unittest
+import pkgutil
+import importlib
+
+
+def get_server_path():
+    odoo_org, odoo_repo = os.environ.get("ODOO_REPO", "odoo/odoo").split('/')
+    odoo_version = os.environ.get("VERSION").replace('/', '-')
+
+    server_dirname = "%s-%s" % (odoo_repo, odoo_version)
+    server_path = os.path.join(os.environ.get("HOME", "~/"), server_dirname)
+    return server_path
+
+if __name__ == '__main__':
+
+    # init logging
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
+
+    odoo_path = get_server_path()
+    sys.path.append(odoo_path)
+    
+    # discover tests
+    loader = unittest.TestLoader()
+    runner = unittest.TextTestRunner()
+    suite = unittest.TestSuite()
+    for module in pkgutil.iter_modules([__package__]):
+        if module.name.startswith("test"):
+            mod = importlib.import_module(".{}".format(module.name), __package__)
+            if "_addTestsToSuite" in dir(mod):
+                mod._addTestsToSuite(suite)
+            else:
+                suite.addTest(loader.loadTestsFromModule(mod))
+    # run tests
+    results = runner.run(suite)
+    if results.failures or results.errors:
+        sys.exit(1)
+    else:
+        sys.exit(0)

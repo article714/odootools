@@ -6,7 +6,7 @@ from odoo.tools import config
 from odootools import OdooScript
 
 
-class upgrade_all_modules(OdooScript.Script):
+class UpgradeAllModules(OdooScript.Script):
 
     # ***********************************
     # Main
@@ -62,5 +62,5 @@ class upgrade_all_modules(OdooScript.Script):
 
 
 if __name__ == "__main__":
-    script = upgrade_all_modules()
+    script = UpgradeAllModules()
     script.run()

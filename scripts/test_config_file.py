@@ -5,7 +5,7 @@
 import OdooScript
 
 
-class test_config_file(OdooScript.Script):
+class TestConfigFile(OdooScript.Script):
     def run(self):
 
         odoo_host = self.getConfigValue("odoo_host")
@@ -23,5 +23,5 @@ class test_config_file(OdooScript.Script):
 # *******************************************************
 # Launch main function
 if __name__ == "__main__":
-    script = test_config_file()
+    script = TestConfigFile()
     script.run()
