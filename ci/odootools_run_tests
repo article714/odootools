@@ -32,8 +32,7 @@ if __name__ == "__main__":
     runner = unittest.TextTestRunner()
     suite = unittest.TestSuite()
     for module in pkgutil.iter_modules(["tests"]):
-        print(module)
-        if module.name.startswith("test"):
+        if module[1].startswith("test"):
             mod = importlib.import_module(".{}".format(module.name), "tests")
             if "_addTestsToSuite" in dir(mod):
                 mod._addTestsToSuite(suite)
