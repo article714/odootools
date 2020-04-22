@@ -26,3 +26,10 @@ class SampleScript(odooscript.AbstractOdooScript):
         Constructor
         """
         super(SampleScript, self).__init__(parse_config=False)
+
+    def run(self):
+        """
+        I do run a test
+        """
+
+        self.logger.info("I'm running")

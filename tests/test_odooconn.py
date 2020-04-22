@@ -10,27 +10,38 @@ Utility functions to convert data
 @copyright: ©2018 Article714
 @license: AGPL
 """
-
 from os.path import sep
 import sys
 import unittest
 
 from odootools import odooconnection
-from .scripts.aSampleScript import SampleScript
+from .scripts.a_sample_script import SampleScript
 
 
 class TestOdooConn(unittest.TestCase):
+    """
+    Odoo Connection Test
+    """
+
+    def __init__(self):
+        super(TestOdooConn, self).__init__()
+        self.odooxmlrpc = None
+
     def setUp(self):
         """Test Init"""
+        super(TestOdooConn, self).setUp()
         sys.argv = ["testing"]
-        self.innerScript = SampleScript()
-        self.innerScript.parse_config(
+        self.inner_script = SampleScript()
+        self.inner_script.parse_config(
             aConfigfile="test%setc%stestScript.config" % (sep, sep)
         )
 
-        self.connection = odooconnection.Connection(self.innerScript)
+        self.connection = odooconnection.Connection(self.inner_script)
 
     def test_conn(self):
+        """
+        Test the Connection
+        """
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
@@ -38,6 +49,9 @@ class TestOdooConn(unittest.TestCase):
         self.assertIsNotNone(self.odooxmlrpc, "Failed to init connection")
 
     def test_odoo_search(self):
+        """
+        Test the search
+        """
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
@@ -47,6 +61,9 @@ class TestOdooConn(unittest.TestCase):
         self.assertGreater(len(found), 0, "No partner found, issue!")
 
     def test_odoo_search_create_or_write(self):
+        """
+        Test the creation of a record
+        """
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
@@ -66,6 +83,9 @@ class TestOdooConn(unittest.TestCase):
         self.assertGreater(found, 0, "No partner found, issue!")
 
     def test_odoo_search_delete(self):
+        """
+        Test the search & deletion of a record
+        """
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
@@ -74,8 +94,8 @@ class TestOdooConn(unittest.TestCase):
         )
         self.assertIsNotNone(found, "No partner found, issue!")
         self.assertGreater(len(found), 0, "No partner found, issue!")
-        for id in found:
-            self.connection.odoo_delete("res.partner", id)
+        for anid in found:
+            self.connection.odoo_delete("res.partner", anid)
         found = self.connection.odoo_idsearch(
             "res.partner", [("name", "=", "Someone who cares")]
         )

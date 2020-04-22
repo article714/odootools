@@ -1,25 +1,35 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Simple OdooScript to verify a provided config file
+"""
 
-import odooscript
+from odootools import odooscript
 
 
 class TestConfigFile(odooscript.AbstractOdooScript):
-    def run(self):
+    """
+    Verifies that provided config file is correct
+    """
 
+    def run(self):
+        """
+        main processing
+        """
         odoo_host = self.get_config_value("odoo_host")
         url = "http://" + odoo_host + ":" + self.get_config_value("odoo_port")
         db_name = self.get_config_value("db_name")
         db_local = self.get_config_value("db_local")
 
-        print(
-            "WILL USE ODOO SERVER : {}  \n \t AND DATABASE: {}   ({})".format(
-                url, db_name, str(db_local)
-            )
+        self.logger.warning(
+            "WILL USE ODOO SERVER : %s  \n \t AND DATABASE: %s   (%s)",
+            url,
+            db_name,
+            str(db_local),
         )
 
 
 # *******************************************************
 # Launch main function
 if __name__ == "__main__":
-    script = TestConfigFile()
-    script.run()
+    SCRIPT = TestConfigFile()
+    SCRIPT.run()

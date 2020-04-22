@@ -40,7 +40,7 @@ ODOO_DATE_FMT = "%Y-%m-%d %H:%M:%S"  # '2018-03-01 11:50:17'
 
 
 # *****************************
-class Connection(object):
+class Connection:
     """
     Abstraction for a Connection to an distant Odoo server
     """
@@ -50,6 +50,7 @@ class Connection(object):
     # parameter script must be an instance of odooscript
     def __init__(self, ctx):
         self.context = ctx
+        self.odoo_context = None
         # xmlrpc connection
         self.xmlrpc_uid = None
         self.xmlrpc_models = None
@@ -61,8 +62,10 @@ class Connection(object):
             self.logger = logging.getLogger(__name__)
 
     # *************************************************************
-    # gets a New XMLRPC connection to odoo
     def getXMLRPCConnection(self):
+        """
+        gets a New XMLRPC connection to odoo
+        """
 
         if self.xmlrpc_uid is not None:
             return (self.xmlrpc_uid, self.xmlrpc_models)
@@ -94,7 +97,7 @@ class Connection(object):
 
         self.srv_ver = float(dbproxy.server_version().split("-")[0])
         self.logger.info(
-            " Connected to odoo server version %s" % str(self.srv_ver)
+            " Connected to odoo server version %s", str(self.srv_ver)
         )
 
         if self.srv_ver > 8.0:
@@ -108,8 +111,8 @@ class Connection(object):
 
         try:
             common.version()
-        except Exception as e:
-            self.logger.exception("Paf! %s" % str(e))
+        except Exception as err:
+            self.logger.exception("Paf! %s", str(err))
             return None
 
         lang = self.context.get_config_value("language")
@@ -137,9 +140,10 @@ class Connection(object):
             )
 
         if not uid:
-            print(
+            self.logger.error(
                 "ERROR: Not able to connect to Odoo with given information"
-                ", username: " + odoo_username
+                ", username: %s",
+                odoo_username,
             )
             sys.exit(1)
 
@@ -149,8 +153,10 @@ class Connection(object):
         return (uid, odoo_models)
 
     # *************************************************************
-    # gets a New Postgresql connection to odoo
     def getDBConnection(self):
+        """
+        gets a New Postgresql connection to odoo
+        """
         db_name = self.context.get_config_value("db_name")
 
         if pgdb:
@@ -162,26 +168,24 @@ class Connection(object):
                     database=db_name,
                     user=self.context.get_config_value("db_username"),
                 )
-            else:
-                if self.context.get_config_value("db_password") is not None:
-                    return pgdb.connect(
-                        database=db_name,
-                        dsn=ldsn,
-                        user=self.context.get_config_value("db_username"),
-                        password=self.context.get_config_value("db_password"),
-                    )
-                else:
-                    return pgdb.connect(
-                        database=db_name,
-                        dsn=ldsn,
-                        user=self.context.get_config_value("db_username"),
-                    )
+
+            if self.context.get_config_value("db_password") is not None:
+                return pgdb.connect(
+                    database=db_name,
+                    dsn=ldsn,
+                    user=self.context.get_config_value("db_username"),
+                    password=self.context.get_config_value("db_password"),
+                )
+
+            return pgdb.connect(
+                database=db_name,
+                dsn=ldsn,
+                user=self.context.get_config_value("db_username"),
+            )
         else:
             logging.error("No PGDB module")
 
     # *************************************************************************
-    # helper function to search and create or write if exist
-
     def odoo_search_create_or_write(
         self,
         model_name,
@@ -190,6 +194,9 @@ class Connection(object):
         create_only=False,
         can_be_archived=False,
     ):
+        """
+        helper function to search and create or write if exist
+        """
         obj_id = None
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
@@ -264,19 +271,20 @@ class Connection(object):
 
             return obj_id
 
-        except Exception as e:
+        except Exception as err:
             self.logger.error(
-                "WARN Error when looking for or writing a record for model: "
-                + model_name
-                + " [ "
-                + to_string(values)
-                + "] "
-                + to_string(e)
+                "WARN Error when looking for or writing a record for "
+                "model: %s [ %s ] %s",
+                model_name,
+                to_string(values),
+                to_string(err),
             )
 
     # *************************************************************
-    # Search elements in odoo
     def odoo_search(self, model_name, search_conditions, result_parameters):
+        """
+        Search elements in odoo
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
@@ -297,29 +305,29 @@ class Connection(object):
                     result_parameters,
                 )
                 return result
-            else:
-                found = self.xmlrpc_models.execute_kw(
+
+            found = self.xmlrpc_models.execute_kw(
+                self.context.get_config_value("db_name"),
+                self.xmlrpc_uid,
+                self.context.get_config_value("odoo_password"),
+                model_name,
+                "search",
+                [search_conditions],
+                {"context": self.odoo_context},
+            )
+            if len(found) > 0:
+                result = self.xmlrpc_models.execute_kw(
                     self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
                     self.context.get_config_value("odoo_password"),
                     model_name,
-                    "search",
-                    [search_conditions],
+                    "read",
+                    [found],
                     {"context": self.odoo_context},
                 )
-                if len(found) > 0:
-                    result = self.xmlrpc_models.execute_kw(
-                        self.context.get_config_value("db_name"),
-                        self.xmlrpc_uid,
-                        self.context.get_config_value("odoo_password"),
-                        model_name,
-                        "read",
-                        [found],
-                        {"context": self.odoo_context},
-                    )
-                    return result
-                else:
-                    return ()
+                return result
+
+            return ()
 
         except xmlrpclib.Fault:
             logging.exception(
@@ -331,8 +339,10 @@ class Connection(object):
             return ()
 
     # *************************************************************
-    # Search id of elements in odoo with language support enabled
     def odoo_idsearch(self, model_name, search_conditions):
+        """
+        Search id of elements in odoo with language support enabled
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
@@ -357,8 +367,10 @@ class Connection(object):
             return ()
 
     # *************************************************************
-    # Read elements in odoo
     def odoo_read(self, model_name, ids):
+        """
+        Read elements in odoo
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
 
@@ -374,23 +386,24 @@ class Connection(object):
             )
             return result
 
-        except xmlrpclib.Fault as e:
-            print(
-                "     WARNING: error when reading  object: "
-                + model_name
-                + " -> "
-                + str(ids)
+        except xmlrpclib.Fault as err:
+            self.logger.error(
+                "     WARNING: error when reading  object: %s -> %s",
+                model_name,
+                str(ids),
             )
-            print(
-                "                    MSG: {0} -> {1}".format(
-                    e.faultCode, "".join(e.faultString.split("\n")[-2:])
-                )
+            self.logger.error(
+                "                    MSG: %s -> %s",
+                err.faultCode,
+                "".join(err.faultString.split("\n")[-2:]),
             )
             return None
 
     # *************************************************************
-    # Update element in odoo   // Single Object
     def odoo_write(self, model_name, obj_id, values):
+        """
+        Update element in odoo   // Single Object
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
@@ -404,23 +417,25 @@ class Connection(object):
                 {"context": self.odoo_context},
             )
             return result
-        except xmlrpclib.Fault as e:
-            print(
-                "     WARNING: error when writing object: "
-                + model_name
-                + " -> "
-                + str(values)
+        except xmlrpclib.Fault as err:
+            self.logger.error(
+                "     WARNING: error when writing object: %s -> %s ",
+                model_name,
+                str(values),
             )
-            print(
-                "                    MSG: {0} -> {1}".format(
-                    e.faultCode, "".join(e.faultString.split("\n")[-2:])
-                )
+            self.logger.error(
+                "                    MSG: %s -> %s",
+                err.faultCode,
+                "".join(err.faultString.split("\n")[-2:]),
             )
             return None
 
     # *************************************************************
     # Create  new element in odoo   // Single Object
     def odoo_create(self, model_name, *values):
+        """
+        Create a new record
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
@@ -434,28 +449,29 @@ class Connection(object):
                 {"context": self.odoo_context},
             )
             return result
-        except xmlrpclib.Fault as e:
-            print(
-                "     WARNING: error when creating object: "
-                + model_name
-                + " -> "
-                + str(values)
+        except xmlrpclib.Fault as err:
+            self.logger.error(
+                "     WARNING: error when creating object: %s -> %s",
+                model_name,
+                str(values),
             )
-            print(
-                "                    MSG: {0} -> {1}".format(
-                    e.faultCode, "".join(e.faultString.split("\n")[-2:])
-                )
+            self.logger.error(
+                "                    MSG: %s -> %s",
+                err.faultCode,
+                "".join(err.faultString.split("\n")[-2:]),
             )
             return None
 
     # *************************************************************
-    # Deletes  new element in odoo
     def odoo_delete(self, model_name, obj_ids):
+        """
+        Deletes  new element in odoo
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = False
-            if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
+            if isinstance(obj_ids, (tuple, list)):
                 result = self.xmlrpc_models.execute_kw(
                     self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
@@ -476,28 +492,30 @@ class Connection(object):
                     {"context": self.odoo_context},
                 )
             return result
-        except xmlrpclib.Fault as e:
-            print(
-                "     WARNING: error when deleting object: "
-                + model_name
-                + " -> "
-                + str(obj_ids)
+        except xmlrpclib.Fault as err:
+            self.logger.warning(
+                "     WARNING: error when deleting object: %s -> %s",
+                model_name,
+                str(obj_ids),
             )
-            print(
-                "                    MSG: {0} -> {1}".format(
-                    e.faultCode, "".join(e.faultString.split("\n")[-2:])
-                )
+            self.logger.warning(
+                "                    MSG: %s -> %s",
+                err.faultCode,
+                "".join(err.faultString.split("\n")[-2:]),
             )
             return None
 
     # *************************************************************
     # Execute stuff in odoo   // Single Object
     def odoo_execute(self, model_name, method_name, obj_ids, parameters):
+        """
+        Run execute_kw
+        """
         if self.xmlrpc_uid is None:
             self.getXMLRPCConnection()
         try:
             result = False
-            if isinstance(obj_ids, list) or isinstance(obj_ids, tuple):
+            if isinstance(obj_ids, (tuple, list)):
                 result = self.xmlrpc_models.execute_kw(
                     self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
@@ -518,18 +536,16 @@ class Connection(object):
                     {"context": self.odoo_context},
                 )
             return result
-        except xmlrpclib.Fault as e:
-            print(
-                "     WARNING: error when executing "
-                + method_name
-                + " on object: "
-                + model_name
-                + " -> "
-                + str(parameters)
+        except xmlrpclib.Fault as err:
+            self.logger.error(
+                "     WARNING: error when executing %s on object: %s -> %s",
+                method_name,
+                model_name,
+                str(parameters),
             )
-            print(
-                "                    MSG: {0} -> {1}".format(
-                    e.faultCode, "".join(e.faultString.split("\n")[-2:])
-                )
+            self.logger.error(
+                "                    MSG: %s-> %s",
+                err.faultCode,
+                "".join(err.faultString.split("\n")[-2:]),
             )
             return None

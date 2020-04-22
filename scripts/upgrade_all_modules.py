@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Simple OdooScript to upgrade all installed modules
+"""
 
 import odoo
 from odoo.tools import config
@@ -6,16 +9,20 @@ from odootools import odooscript
 
 
 class UpgradeAllModules(odooscript.AbstractOdooScript):
-
-    # ***********************************
-    # Main
+    """
+    See run()
+    """
 
     def run(self):
+        """
+        Simple OdooScript to upgrade all installed modules
+        """
 
         self.init_logs()
 
         self.odooargs = []
-        if odoo is not False and self.config is not None:
+        # Do we still need this?
+        if self.config is not None:
 
             self.dbname = self.get_config_value("db_name")
             db_host = self.get_config_value("db_host")
@@ -23,7 +30,7 @@ class UpgradeAllModules(odooscript.AbstractOdooScript):
             db_pwd = self.get_config_value("db_password")
 
             if self.dbname is not None and odoo is not False:
-                self.logger.info("CONNECTING TO DB : " + self.dbname)
+                self.logger.info("CONNECTING TO DB : %s ", self.dbname)
 
             if odoo is not False and self.config is not None:
                 self.odooargs.append(
@@ -51,7 +58,9 @@ class UpgradeAllModules(odooscript.AbstractOdooScript):
                 ].context_get()
                 self.env = odoo.api.Environment(self.cursor, uid, ctx)
 
-                self.logger.warn("FINISHING UPGRADE" + self.dbname)
+                # We need to check that this works!!!
+
+                self.logger.warning("FINISHING UPGRADE %s", self.dbname)
 
                 self.cursor.commit()
                 self.cursor.close()
@@ -67,5 +76,5 @@ class UpgradeAllModules(odooscript.AbstractOdooScript):
 
 
 if __name__ == "__main__":
-    script = UpgradeAllModules()
-    script.run()
+    SCRIPT = UpgradeAllModules()
+    SCRIPT.run()

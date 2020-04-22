@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Simple OdooScript to updata Odoo translations
+"""
 
 import contextlib
 import cStringIO
@@ -9,13 +12,23 @@ from odootools import odooscript
 
 
 class UpdateTranslations(odooscript.AbstractOdooScript):
+    """
+    Updates all translations for a given odoo instance
+    """
+
     def get_languages(self):
+        """
+        returns defined languages for instance
+        """
         langs = self.env["res.lang"].search(
             [("active", "=", True), ("translatable", "=", True)]
         )
         return [(lang.code, lang.name, lang.id) for lang in langs]
 
     def get_lang_name(self, lang_code):
+        """
+        Get the full ref of install language
+        """
         lang = self.env["res.lang"].search([("code", "=", lang_code)], limit=1)
         if not lang:
             raise UserError(_('No language with code "%s" exists') % lang_code)
@@ -59,5 +72,5 @@ class UpdateTranslations(odooscript.AbstractOdooScript):
 
 
 if __name__ == "__main__":
-    script = UpdateTranslations()
-    script.run_in_odoo_context()
+    SCRIPT = UpdateTranslations()
+    SCRIPT.run_in_odoo_context()

@@ -7,30 +7,37 @@ Test Utility functions to convert data
 
 
 @author: C. Guychard
-@copyright: ©2018 Article714
+@copyright: ©2018-2020 Article714
 @license: AGPL
 """
 
-from os import getcwd
 from os.path import sep
 import sys
 import unittest
 
-from test.scripts.aSampleScript import SampleScript
+from .scripts.a_sample_script import SampleScript
 
 
 class TestOdooScript(unittest.TestCase):
+    """
+    Test a sample script
+    """
+
     def setUp(self):
         """Test Init"""
+        super(TestOdooScript, self).setUp()
         sys.argv = ["testing"]
-        self.innerScript = SampleScript()
+        self.inner_script = SampleScript()
 
     def test_parse_config(self):
-        self.innerScript.parse_config(
-            aConfigfile="test%setc%stestScript.config" % (sep, sep)
+        """
+        Simply test parsing config file
+        """
+        self.inner_script.parse_config(
+            aConfigfile=f"test{sep}setc{sep}testScript.config"
         )
-        self.assertEquals(
-            self.innerScript.get_config_value("language"),
+        self.assertEqual(
+            self.inner_script.get_config_value("language"),
             "fr_FR",
             "Unable to parse config",
         )

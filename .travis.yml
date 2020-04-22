@@ -56,6 +56,7 @@ jobs:
   include:
     - env: LINT_CHECK="1"
       script:
+        - export PYTHONPATH=./src/:$PYTHONPATH
         - pylint --rcfile=ci/pylint-rc src/odootools/
         - pylint --rcfile=ci/pylint-rc scripts/
         - pylint --rcfile=ci/pylint-rc tests/

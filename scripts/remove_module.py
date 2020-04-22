@@ -1,67 +1,27 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+"""
+Simple OdooScript to remove an already installed Odoo module
+"""
 
-import odoo
-from odoo.tools import config
+
 from odootools import odooscript
 
 
 class RemoveModuleScript(odooscript.AbstractOdooScript):
+    """
+    See run()
+    """
 
     # ***********************************
     # Main
 
     def run(self):
+        """
+        Removes a module (uninstall)
+        """
 
-        self.init_logs()
-
-        self.odooargs = []
-        if odoo is not False and self.config is not None:
-
-            self.dbname = self.get_config_value("db_name")
-            db_host = self.get_config_value("db_host")
-            db_usr = self.get_config_value("db_username")
-            db_pwd = self.get_config_value("db_password")
-
-            if self.dbname is not None and odoo is not False:
-                self.logger.info("CONNECTING TO DB : " + self.dbname)
-
-            if odoo is not False and self.config is not None:
-                self.odooargs.append(
-                    "-c" + self.get_config_value("odoo_config")
-                )
-                self.odooargs.append("-d" + self.dbname)
-                if db_host:
-                    self.odooargs.append("--db_host=%s" % db_host)
-                if db_usr and db_pwd:
-                    self.odooargs.append("-r%s" % db_usr)
-                    self.odooargs.append("-w%s" % db_pwd)
-
-            config.parse_config(self.odooargs)
-
-            odoo.cli.server.report_configuration()
-
-            with odoo.api.Environment.manage():
-                registry = odoo.registry(self.dbname)
-
-                # update list of modules to uninstall
-
-                odoo.modules.load_modules(registry)
-                self.cursor = registry.cursor()
-                uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cursor, uid, {})[
-                    "res.users"
-                ].context_get()
-                self.env = odoo.api.Environment(self.cursor, uid, ctx)
-
-                self.logger.warn("FINISHING UPGRADE" + self.dbname)
-
-                self.cursor.commit()
-                self.cursor.close()
-
-        else:
-            self.logger.error(
-                "NO DB NAME given or No Odoo installation provided"
-            )
+        # We need to write the code to remove a module !!!
+        return 0
 
 
 # *******************************************************
@@ -69,5 +29,5 @@ class RemoveModuleScript(odooscript.AbstractOdooScript):
 
 
 if __name__ == "__main__":
-    script = RemoveModuleScript()
-    script.run()
+    SCRIPT = RemoveModuleScript()
+    SCRIPT.run()

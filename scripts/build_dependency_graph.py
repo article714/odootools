@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+Simple OdooScript to build a graph of installed module deps
+"""
 
 import logging
 from sys import exit as sysexit
@@ -37,6 +40,10 @@ NAMED_ATTR = ["label", "edgelabel", "x", "y", "size", "r", "g", "b"]
 
 
 class GephiGraphMLWriter(GraphMLWriter):
+    """
+    Customized GraphML writer for gephi compatibility
+    """
+
     def get_key(self, name, attr_type, scope, default):
         keys_key = (name, attr_type, scope)
         try:
@@ -64,6 +71,10 @@ class GephiGraphMLWriter(GraphMLWriter):
 
 
 class BuildDependencyGraph(odooscript.AbstractOdooScript):
+    """
+    Main class to build dependency graph
+    """
+
     def __init__(self):
         super(BuildDependencyGraph, self).__init__()
         self.shells = [
@@ -74,14 +85,16 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
         self.graph = networkx.DiGraph()
 
     def add_node(self, node, modlicense, node_colors):
-
+        """
+        add a Node to the Graph
+        """
         if node not in self.graph.nodes():
             color = "grey"
             if modlicense in LICENSE_COLOR_MAP:
                 color = LICENSE_COLOR_MAP[modlicense]
                 node_colors.append(LICENSE_COLOR_MAP[modlicense])
             else:
-                print(f"Missing license {modlicense}")
+                self.logger.warning("Missing license %s", modlicense)
                 node_colors.append("grey")
 
             self.graph.add_node(
@@ -101,28 +114,55 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
             )
             self.nodelevels[node] = [0, 0]
 
-    def process_depth(self, fromnode, tonode):
-        self.nodelevels[tonode][1] += 1
-        self.graph.nodes[tonode]["inlinks"] = self.nodelevels[tonode][1]
-        self.graph.nodes[tonode]["weight"] = self.nodelevels[tonode][1]
-        if self.nodelevels[fromnode][0] <= self.nodelevels[tonode][0]:
-            self.nodelevels[fromnode][0] = self.nodelevels[tonode][0] + 1
-            self.graph.nodes[fromnode]["level"] = self.nodelevels[fromnode][0]
-        if self.depth < self.nodelevels[fromnode][0]:
-            self.depth = self.nodelevels[fromnode][0]
+    def process_depth(self, mods, first=True):
+        """
+        Calculate depth of dependency tree
+        """
+        changed = False
+        for node in mods:
+            fromnode = node.name
+            for dep in fromnode.dependencies:
+                tonode = dep.depend_id.name
+                if first:
+                    self.nodelevels[tonode][1] += 1
+                    self.graph.nodes[tonode]["inlinks"] = self.nodelevels[
+                        tonode
+                    ][1]
+                    self.graph.nodes[tonode]["weight"] = self.nodelevels[
+                        tonode
+                    ][1]
+                if self.nodelevels[fromnode][0] <= self.nodelevels[tonode][0]:
+                    self.nodelevels[fromnode][0] = (
+                        self.nodelevels[tonode][0] + 1
+                    )
+                    self.graph.nodes[fromnode]["level"] = self.nodelevels[
+                        fromnode
+                    ][0]
+                    changed = True
+                if self.depth < self.nodelevels[fromnode][0]:
+                    self.depth = self.nodelevels[fromnode][0]
+                    changed = True
+        if changed:
+            self.process_depth(mods, first=False)
 
     def process_shells(self):
+        """
+        process the layout rings of dependencies
+        """
         i = 0
         while i < self.depth:
             self.shells.insert(0, [])
             i += 1
-        for node in self.nodelevels.keys():
+        for node in self.nodelevels:
             if node not in self.shells[-self.nodelevels[node][0]]:
                 self.shells[-self.nodelevels[node][0]].append(node)
-        return
 
-    def draw_graph(self, size, name, positions, node_colors, edge_colors):
-
+    def draw_graph(
+        self, size, name, positions, node_colors, edge_colors
+    ):  # pylint: disable=too-many-arguments
+        """
+        Draw a graph and saves PNG
+        """
         plt.figure(figsize=(size, size))
         networkx.draw_networkx_nodes(
             self.graph,
@@ -157,6 +197,9 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
     # Main
 
     def run(self):
+        """
+        Main method (OdooScript)
+        """
         if networkx is not None:
             # Build dependency graph
             mods = self.env["ir.module.module"].search(
@@ -164,14 +207,12 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
             )
             node_colors = []
             # first add all nodes
-            for mod in mods:
-                self.add_node(mod.name, mod.license, node_colors)
 
-            # process dep depth
-            for i in range(5):
-                for mod in mods:
-                    for dep in mod.dependencies_id:
-                        self.process_depth(mod.name, dep.depend_id.name)
+            mods.mapped(
+                lambda x: self.add_node(x.name, x.license, node_colors)
+            )
+
+            self.process_depth(mods)
             self.process_shells()
 
             # then process edges
@@ -182,20 +223,17 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
                     color = "grey"
                     compatible = False
                     if mod.license in LICENSE_COMPATIBILITY_MATRIX:
-                        if dep.depend_id:
-                            dep_license = dep.depend_id.license
-                            if (
-                                dep_license
-                                in LICENSE_COMPATIBILITY_MATRIX[mod.license]
-                            ):
-                                color = "#22aa22"
-                                compatible = True
-                            else:
-                                color = "red"
+                        if (
+                            dep.depend_id
+                            and dep.depend_id.license
+                            in LICENSE_COMPATIBILITY_MATRIX[mod.license]
+                        ):
+                            color = "#22aa22"
+                            compatible = True
+                        elif dep.depend_id:
+                            color = "red"
                         else:
                             color = "grey"
-                    else:
-                        edge_colors.append("grey")
 
                     edge_colors.append(color)
 
@@ -216,8 +254,6 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
                         ),
                     )
 
-            nb_nodes = len(self.graph.nodes())
-
             init_positions = {
                 "shell": networkx.shell_layout(
                     self.graph, self.shells, scale=5.0
@@ -225,7 +261,7 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
                 "spectral": networkx.spectral_layout(self.graph, scale=5),
             }
 
-            size = 16 + round(nb_nodes / 2)
+            size = 16 + round(len(self.graph.nodes()) / 2)
 
             for pos0 in init_positions:
 
@@ -250,6 +286,7 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
             for node in self.graph.nodes:
                 self.graph.nodes[node]["x"] = 256 * pos1[node][0]
                 self.graph.nodes[node]["y"] = 256 * pos1[node][1]
+
             writer = GephiGraphMLWriter(
                 encoding="utf-8", prettyprint=True, infer_numeric_types=False
             )
@@ -265,5 +302,5 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
 
 
 if __name__ == "__main__":
-    script = BuildDependencyGraph()
-    script.run_in_odoo_context()
+    SCRIPT = BuildDependencyGraph()
+    SCRIPT.run_in_odoo_context()
