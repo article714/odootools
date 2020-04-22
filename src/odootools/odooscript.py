@@ -32,10 +32,10 @@ try:
     from odoo.tools import config
 except (ModuleNotFoundError, ImportError):
     ODOO_OK = False
+    logging.error("ImportError: config from odoo.tools")
 
 # ************************************************
 #  CONSTANTS
-
 
 FORMAT_CONSOLE = "%(levelname)s - %(message)s"
 FORMAT_FIC = "%(asctime)s - %(levelname)s - %(message)s"
@@ -53,8 +53,6 @@ class AbstractOdooScript(
     """
 
     # *************************************************************
-    # Constructor, passing arguments from the command line
-
     def __init__(self, parse_config=True):
         """
         Constructor that uses command line arguments to build a config object
@@ -70,18 +68,46 @@ class AbstractOdooScript(
 
         logging.basicConfig(
             level=logging.INFO,
-            format="%(relativeCreated)6d %(threadName)s %(message)s",
+            format="%(asctime)s :: %(levelname)s :: %(name)s :: %(threadName)s :: %(message)s",
         )
 
         # Logging configuration
         self.logger = logging.getLogger(self.name)
         self.log_handlers = []
 
-        # ******
-        # args parsing
-
         self.configfile = None
         self.config = None
+
+        # ******
+        # args parsing
+        self._parse_args()
+
+        # ******
+        # config parsing
+
+        if parse_config:
+            # Parses configuration only if not yet done
+            self.parse_config()
+
+        # *************************************************************
+        # Odoo related variables (connection or embedded)
+        #
+
+        if self.config:
+            self.dbname = self.get_config_value("db_name")
+
+        self.connection = None
+        self.env = None
+        self.cursor = None
+
+        odooargs = []
+        self.odooargs = odooargs
+
+    # *************************************************************
+    def _parse_args(self):
+        """
+        Command line args
+        """
         try:
             opts, unneededargs = getopt.getopt(
                 sys.argv[1:], "hc:", ["config="]
@@ -100,26 +126,6 @@ class AbstractOdooScript(
                 self.configfile = arg
         for arg in unneededargs:
             self.logger.warning("un-nedeed argument %s", str(arg))
-
-        # ******
-        # config parsing
-
-        if parse_config:
-            # Parses configuration only if not yet done
-            self.parse_config()
-
-        # *************************************************************
-        # Odoo related variables (connection or embedded)
-        #
-
-        if parse_config:
-            self.dbname = self.get_config_value("db_name")
-        self.connection = None
-        self.env = None
-        self.cursor = None
-
-        odooargs = []
-        self.odooargs = odooargs
 
     # *************************************************************
     def init_logs(self):
