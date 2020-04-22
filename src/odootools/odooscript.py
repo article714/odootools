@@ -248,7 +248,7 @@ class AbstractOdooScript(
         # Gets Connections
 
         self.connection = odooconnection.Connection(self)
-        self.connection.getXMLRPCConnection()
+        self.connection.get_odoo_xmlrpx_connection()
         self.run()
 
     # *************************************************************************

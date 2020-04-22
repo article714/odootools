@@ -21,8 +21,10 @@ from .stringconverters import to_string
 
 try:
     import pgdb
-except Exception:
-    pgdb = False
+
+    PGDB = True
+except (ModuleNotFoundError, ImportError):
+    PGDB = False
     logging.warning(
         "error on import PGDB module => cannot connect locally to POSTGRESQL "
     )
@@ -62,7 +64,7 @@ class Connection:
             self.logger = logging.getLogger(__name__)
 
     # *************************************************************
-    def getXMLRPCConnection(self):
+    def get_odoo_xmlrpx_connection(self):  # pylint: disable=too-many-branches
         """
         gets a New XMLRPC connection to odoo
         """
@@ -111,7 +113,7 @@ class Connection:
 
         try:
             common.version()
-        except Exception as err:
+        except xmlrpclib.Fault as err:
             self.logger.exception("Paf! %s", str(err))
             return None
 
@@ -153,13 +155,13 @@ class Connection:
         return (uid, odoo_models)
 
     # *************************************************************
-    def getDBConnection(self):
+    def get_db_connection(self):
         """
         gets a New Postgresql connection to odoo
         """
         db_name = self.context.get_config_value("db_name")
 
-        if pgdb:
+        if PGDB:
             # *************************************************************
             # connect to Db
             ldsn = self.context.get_config_value("db_host") + ":5432"
@@ -182,11 +184,11 @@ class Connection:
                 dsn=ldsn,
                 user=self.context.get_config_value("db_username"),
             )
-        else:
-            logging.error("No PGDB module")
+        logging.error("No PGDB module")
+        return None
 
     # *************************************************************************
-    def odoo_search_create_or_write(
+    def odoo_search_create_or_write(  # pylint: disable=too-many-arguments,dangerous-default-value
         self,
         model_name,
         search_criteria=[],
@@ -199,7 +201,7 @@ class Connection:
         """
         obj_id = None
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             if can_be_archived:
                 full_search = copy.copy(search_criteria)
@@ -227,14 +229,12 @@ class Connection:
                         [values],
                         {"context": self.odoo_context},
                     )
-                except Exception as e:
+                except xmlrpclib.Fault as err:
                     self.logger.error(
-                        "Failed to create record "
-                        + model_name
-                        + " [ "
-                        + to_string(values)
-                        + "] "
-                        + to_string(e)
+                        "Failed to create record %s [ %s ] %s",
+                        model_name,
+                        to_string(values),
+                        to_string(err),
                     )
 
             elif lfound == 1:
@@ -250,28 +250,24 @@ class Connection:
                             [obj_id, values],
                             {"context": self.odoo_context},
                         )
-                except Exception as e:
+                except xmlrpclib.Fault as err:
                     self.logger.error(
-                        "Failed to write record "
-                        + model_name
-                        + "("
-                        + to_string(obj_id)
-                        + ") [ "
-                        + to_string(values)
-                        + "] "
-                        + to_string(e)
+                        "Failed to write record %s (%s) [%s] -> %s",
+                        model_name,
+                        to_string(obj_id),
+                        to_string(values),
+                        to_string(err),
                     )
             else:
                 self.logger.warning(
-                    "Failed to update record  ("
-                    + model_name
-                    + ") too many objects found for "
-                    + str(search_criteria)
+                    "Failed to update record  ( %s ) too many objects found for %s",
+                    model_name,
+                    str(search_criteria),
                 )
 
             return obj_id
 
-        except Exception as err:
+        except xmlrpclib.Fault as err:
             self.logger.error(
                 "WARN Error when looking for or writing a record for "
                 "model: %s [ %s ] %s",
@@ -286,7 +282,7 @@ class Connection:
         Search elements in odoo
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
 
             if result_parameters:
@@ -315,7 +311,7 @@ class Connection:
                 [search_conditions],
                 {"context": self.odoo_context},
             )
-            if len(found) > 0:
+            if found:
                 result = self.xmlrpc_models.execute_kw(
                     self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
@@ -331,10 +327,9 @@ class Connection:
 
         except xmlrpclib.Fault:
             logging.exception(
-                "WARNING: error when searching for object: "
-                + model_name
-                + " -> "
-                + str(search_conditions)
+                "WARNING: error when searching for object: %s -> %s",
+                model_name,
+                str(search_conditions),
             )
             return ()
 
@@ -344,7 +339,7 @@ class Connection:
         Search id of elements in odoo with language support enabled
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             result = self.xmlrpc_models.execute_kw(
                 self.context.get_config_value("db_name"),
@@ -359,10 +354,9 @@ class Connection:
             return result
         except xmlrpclib.Fault:
             logging.exception(
-                "     WARNING: error when searching for object: "
-                + model_name
-                + " -> "
-                + str(search_conditions)
+                "     WARNING: error when searching for object: %s -> %s",
+                model_name,
+                str(search_conditions),
             )
             return ()
 
@@ -372,7 +366,7 @@ class Connection:
         Read elements in odoo
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
 
         try:
             result = self.xmlrpc_models.execute_kw(
@@ -405,7 +399,7 @@ class Connection:
         Update element in odoo   // Single Object
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             result = self.xmlrpc_models.execute_kw(
                 self.context.get_config_value("db_name"),
@@ -437,7 +431,7 @@ class Connection:
         Create a new record
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             result = self.xmlrpc_models.execute_kw(
                 self.context.get_config_value("db_name"),
@@ -468,7 +462,7 @@ class Connection:
         Deletes  new element in odoo
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             result = False
             if isinstance(obj_ids, (tuple, list)):
@@ -512,7 +506,7 @@ class Connection:
         Run execute_kw
         """
         if self.xmlrpc_uid is None:
-            self.getXMLRPCConnection()
+            self.get_odoo_xmlrpx_connection()
         try:
             result = False
             if isinstance(obj_ids, (tuple, list)):

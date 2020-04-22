@@ -45,7 +45,7 @@ class TestOdooConn(unittest.TestCase):
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
-        self.odooxmlrpc = self.connection.getXMLRPCConnection()
+        self.odooxmlrpc = self.connection.get_odoo_xmlrpx_connection()
         self.assertIsNotNone(self.odooxmlrpc, "Failed to init connection")
 
     def test_odoo_search(self):

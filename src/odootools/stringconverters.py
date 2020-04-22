@@ -46,18 +46,18 @@ def to_date(value):
     try:
         val = float(value)
         val_date = XLS_DATE_REF + timedelta(val)
-    except Exception:
+    except ValueError:
         val_date = None
 
     if val_date is None:
         try:
             val_date = datetime.strptime(value, "%d/%m/%Y")
-        except Exception:
+        except ValueError:
             val_date = None
         try:
             if val_date is None:
                 val_date = datetime.strptime(value, "%Y-%m-%d 00:00:00")
-        except Exception:
+        except ValueError:
             val_date = None
 
     return val_date
