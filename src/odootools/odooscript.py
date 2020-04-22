@@ -222,6 +222,7 @@ class AbstractOdooScript(
             )
             self.logger.error("USAGE: \n\t %s.py -c <configfile>", self.name)
             self.config = None
+            sys.exit(1)
 
         if self.config is None:
             try:
