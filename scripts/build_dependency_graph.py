@@ -231,7 +231,7 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
 
                 pos1 = networkx.spring_layout(
                     self.graph,
-                    k=10,
+                    k=3,
                     pos=init_positions[pos0],
                     weight="aweight",
                     fixed=None,

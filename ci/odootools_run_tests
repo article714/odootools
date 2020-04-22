@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 import logging
 import os
@@ -9,14 +8,15 @@ import importlib
 
 
 def get_server_path():
-    odoo_org, odoo_repo = os.environ.get("ODOO_REPO", "odoo/odoo").split('/')
-    odoo_version = os.environ.get("VERSION").replace('/', '-')
+    odoo_org, odoo_repo = os.environ.get("ODOO_REPO", "odoo/odoo").split("/")
+    odoo_version = os.environ.get("VERSION").replace("/", "-")
 
     server_dirname = "%s-%s" % (odoo_repo, odoo_version)
     server_path = os.path.join(os.environ.get("HOME", "~/"), server_dirname)
     return server_path
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     # init logging
     logging.basicConfig()
@@ -33,7 +33,9 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     for module in pkgutil.iter_modules(["tests"]):
         if module.name.startswith("test"):
-            mod = importlib.import_module(".{}".format(module.name), __package__)
+            mod = importlib.import_module(
+                ".{}".format(module.name), __package__
+            )
             if "_addTestsToSuite" in dir(mod):
                 mod._addTestsToSuite(suite)
             else:
