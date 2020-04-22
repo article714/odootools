@@ -14,6 +14,7 @@ import getopt
 import logging
 import os.path
 import sys
+import traceback
 from abc import ABCMeta, abstractmethod
 
 from configobj import ConfigObj, ConfigObjError
@@ -312,9 +313,32 @@ class AbstractOdooScript(
             )
 
     # ************************************************************************
-
     @abstractmethod
     def run(self):
         """
         Main Processing Method
         """
+
+    # ************************************************************************
+    def excepthook(self, error_type, error_value, trace_back):
+        """ Will catch unhandled errors """
+        self.print_help()
+        text = "".join(
+            traceback.format_exception(error_type, error_value, trace_back)
+        )
+        self.logger.critical(text)
+
+
+if __name__ == "__main__":
+
+    class OdooScript(AbstractOdooScript):
+        """
+            Subclass just to test AbstractOdooScript class
+        """
+
+        def run(self, cur, env):
+            self.logger.warning((type(cur))
+            self.logger.info("Default implementation does noting")
+
+    SCRIPT = OdooScript()
+    SCRIPT.run_in_odoo_context()
