@@ -69,7 +69,8 @@ class AbstractOdooScript(
 
         logging.basicConfig(
             level=logging.INFO,
-            format="%(asctime)s :: %(levelname)s :: %(name)s :: %(threadName)s :: %(message)s",
+            format="%(asctime)s :: %(levelname)s :: %(name)s :: "
+            "%(threadName)s :: %(message)s",
         )
 
         # Logging configuration
@@ -337,7 +338,7 @@ if __name__ == "__main__":
         """
 
         def run(self, cur, env):
-            self.logger.warning((type(cur))
+            self.logger.warning("Called from %s", type(cur))
             self.logger.info("Default implementation does noting")
 
     SCRIPT = OdooScript()
