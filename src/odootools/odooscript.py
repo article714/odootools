@@ -4,8 +4,8 @@ Created on march 2018
 Utility functions to convert data
 
 
-@author: C. Guychard
-@copyright: ©2018 Article714
+@author: C. Guychard, D. Couppé
+@copyright: ©2018-2020 Article714
 @license: AGPL
 """
 
@@ -106,6 +106,26 @@ class AbstractOdooScript(
         self.odooargs = odooargs
 
     # *************************************************************
+    def print_help(self):
+        """
+            Print help message when required parameter is missing
+            or when -h/--help is provided
+        """
+        print(self.get_help_message())  # pylint: disable=print-used
+
+    # *************************************************************
+    def get_help_message(self):
+        """
+            build help message string
+        """
+        help_message = "\nUSAGE : {}.py [OPTIONS] \n\n".format(self.name)
+        help_message += "OPTIONS: \n\n"
+        help_message += "-h, --help\t\tShow this message\n"
+        help_message += "-c, --config\t\t[REQUIRED] Path to odoo conf file\n"
+
+        return help_message
+
+    # *************************************************************
     def _parse_args(self):
         """
         Command line args
@@ -115,7 +135,7 @@ class AbstractOdooScript(
                 sys.argv[1:], "hc:", ["config="]
             )
         except getopt.GetoptError:
-            self.logger.error("USAGE : \n\t %s.py -c <configfile>", self.name)
+            self.print_help()
             sys.exit(2)
 
         for opt, arg in opts:
@@ -337,8 +357,7 @@ if __name__ == "__main__":
             Subclass just to test AbstractOdooScript class
         """
 
-        def run(self, cur, env):
-            self.logger.warning("Called from %s", type(cur))
+        def run(self):
             self.logger.info("Default implementation does noting")
 
     SCRIPT = OdooScript()
