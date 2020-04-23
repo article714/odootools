@@ -4,11 +4,15 @@ Simple OdooScript to updata Odoo translations
 """
 
 import contextlib
-import cStringIO
 
 from odoo import _, tools
 from odoo.exceptions import UserError
 from odootools import odooscript
+
+try:
+    from StringIO import StringIO  # for Python 2
+except ImportError:
+    from io import StringIO  # for Python 3
 
 
 class UpdateTranslations(odooscript.AbstractOdooScript):
@@ -50,7 +54,7 @@ class UpdateTranslations(odooscript.AbstractOdooScript):
             self.env["res.lang"].browse(lang_inst[2])
 
             # Synchronize
-            with contextlib.closing(cStringIO.StringIO()) as buf:
+            with contextlib.closing(StringIO()) as buf:
                 self.logger.warning(u"Synchronizing for : %s", lang_name)
                 tools.trans_export(lang_code, ["all"], buf, "csv", self.cursor)
                 tools.trans_load_data(
