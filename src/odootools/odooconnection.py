@@ -22,7 +22,9 @@ from .stringconverters import to_string
 try:
     import pgdb
 
-    PGDB = True
+    PGDB = "connect" in dir(
+        pgdb
+    )  # may have confusion between PyGreSQL et pgdb modules :(
 except (ModuleNotFoundError, ImportError):
     PGDB = False
     logging.warning(

@@ -9,17 +9,33 @@ import sys
 from os.path import isdir
 from os.path import join as joinpath
 
-import gevent.monkey
-import psycogreen.gevent
+try:
+    import psycogreen.gevent
+    import gevent.monkey
 
-import odoo
-from odoo.modules import get_module_path, get_modules
+    GEVENT_OK = True
+except (ModuleNotFoundError, ImportError):
+    GEVENT_OK = False
+    logging.warning("error on import gevent modules ")
+
+try:
+    import odoo
+    from odoo.modules import get_module_path, get_modules
+
+    ODOO_OK = True
+except (ModuleNotFoundError, ImportError):
+    ODOO_OK = False
+    logging.error("error on Odoo import")
 
 gevent.monkey.patch_all()
 
 psycogreen.gevent.patch_psycopg()
 
 if __name__ == "__main__":
+
+    if not ODOO_OK or not GEVENT_OK:
+        logging.fatal("Missing needed modules")
+        sys.exit(1)
 
     ARGS = sys.argv[1:]
 
@@ -40,7 +56,7 @@ if __name__ == "__main__":
     COMMAND = "server"
 
     # Subcommand discovery
-    if ARGS and not ARGS[0].startswith("-"):
+    if GEVENT_OK ARGS and not ARGS[0].startswith("-"):
         logging.disable(logging.CRITICAL)
         for module in get_modules():
             if isdir(joinpath(get_module_path(module), "cli")):

@@ -3,4 +3,4 @@ pylint
 pylint-odoo
 networkx
 matplotlib
-pgdb
+PyGreSQL
