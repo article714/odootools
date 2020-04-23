@@ -66,7 +66,7 @@ class Connection:
             self.logger = logging.getLogger(__name__)
 
     # *************************************************************
-    def get_odoo_xmlrpx_connection(self):  # pylint: disable=too-many-branches
+    def get_odoo_xmlrpc_connection(self):  # pylint: disable=too-many-branches
         """
         gets a New XMLRPC connection to odoo
         """
@@ -116,7 +116,7 @@ class Connection:
         try:
             common.version()
         except xmlrpclib.Fault as err:
-            self.logger.exception("Paf! %s", str(err))
+            self.logger.exception("Cannot get Odoo version! %s", str(err))
             return None
 
         lang = self.context.get_config_value("language")
@@ -127,12 +127,18 @@ class Connection:
         else:
             self.odoo_context = {"lang": "fr_FR"}
 
-        uid = common.authenticate(
-            self.context.get_config_value("db_name"),
-            self.context.get_config_value("odoo_username"),
-            self.context.get_config_value("odoo_password"),
-            self.odoo_context,
-        )
+        try:
+            uid = common.authenticate(
+                self.context.get_config_value("db_name"),
+                self.context.get_config_value("odoo_username"),
+                self.context.get_config_value("odoo_password"),
+                self.odoo_context,
+            )
+        except xmlrpclib.Fault as err:
+            self.logger.error(
+                "Cannot get authenticated against Odoo server! %s", str(err)
+            )
+            return None
 
         if self.srv_ver > 8.0:
             odoo_models = xmlrpclib.ServerProxy(
@@ -203,7 +209,7 @@ class Connection:
         """
         obj_id = None
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
             if can_be_archived:
                 full_search = copy.copy(search_criteria)
@@ -262,7 +268,8 @@ class Connection:
                     )
             else:
                 self.logger.warning(
-                    "Failed to update record  ( %s ) too many objects found for %s",
+                    "Failed to update record  ( %s ) too many objects found"
+                    " for %s",
                     model_name,
                     str(search_criteria),
                 )
@@ -284,7 +291,7 @@ class Connection:
         Search elements in odoo
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
 
             if result_parameters:
@@ -341,17 +348,19 @@ class Connection:
         Search id of elements in odoo with language support enabled
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
-            result = self.xmlrpc_models.execute_kw(
-                self.context.get_config_value("db_name"),
-                self.xmlrpc_uid,
-                self.context.get_config_value("odoo_password"),
-                model_name,
-                "search",
-                [search_conditions],
-                {"context": self.odoo_context},
-            )
+            result = None
+            if self.xmlrpc_models is not None:
+                result = self.xmlrpc_models.execute_kw(
+                    self.context.get_config_value("db_name"),
+                    self.xmlrpc_uid,
+                    self.context.get_config_value("odoo_password"),
+                    model_name,
+                    "search",
+                    [search_conditions],
+                    {"context": self.odoo_context},
+                )
 
             return result
         except xmlrpclib.Fault:
@@ -368,7 +377,7 @@ class Connection:
         Read elements in odoo
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
 
         try:
             result = self.xmlrpc_models.execute_kw(
@@ -401,7 +410,7 @@ class Connection:
         Update element in odoo   // Single Object
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
             result = self.xmlrpc_models.execute_kw(
                 self.context.get_config_value("db_name"),
@@ -433,7 +442,7 @@ class Connection:
         Create a new record
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
             result = self.xmlrpc_models.execute_kw(
                 self.context.get_config_value("db_name"),
@@ -464,7 +473,7 @@ class Connection:
         Deletes  new element in odoo
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
             result = False
             if isinstance(obj_ids, (tuple, list)):
@@ -508,7 +517,7 @@ class Connection:
         Run execute_kw
         """
         if self.xmlrpc_uid is None:
-            self.get_odoo_xmlrpx_connection()
+            self.get_odoo_xmlrpc_connection()
         try:
             result = False
             if isinstance(obj_ids, (tuple, list)):

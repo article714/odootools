@@ -56,7 +56,7 @@ if __name__ == "__main__":
     COMMAND = "server"
 
     # Subcommand discovery
-    if GEVENT_OK ARGS and not ARGS[0].startswith("-"):
+    if GEVENT_OK and ARGS and not ARGS[0].startswith("-"):
         logging.disable(logging.CRITICAL)
         for module in get_modules():
             if isdir(joinpath(get_module_path(module), "cli")):

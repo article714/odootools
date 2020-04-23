@@ -23,17 +23,14 @@ class TestOdooConn(unittest.TestCase):
     Odoo Connection Test
     """
 
-    def __init__(self):
-        super(TestOdooConn, self).__init__()
-        self.odooxmlrpc = None
-
     def setUp(self):
         """Test Init"""
         super(TestOdooConn, self).setUp()
+        self.odooxmlrpc = None
         sys.argv = ["testing"]
         self.inner_script = SampleScript()
         self.inner_script.parse_config(
-            aConfigfile="test%setc%stestScript.config" % (sep, sep)
+            configfile="tests%setc%stestScript.config" % (sep, sep)
         )
 
         self.connection = odooconnection.Connection(self.inner_script)
@@ -45,7 +42,7 @@ class TestOdooConn(unittest.TestCase):
         self.assertIsNotNone(
             self.connection, "Failed to create connection object"
         )
-        self.odooxmlrpc = self.connection.get_odoo_xmlrpx_connection()
+        self.odooxmlrpc = self.connection.get_odoo_xmlrpc_connection()
         self.assertIsNotNone(self.odooxmlrpc, "Failed to init connection")
 
     def test_odoo_search(self):

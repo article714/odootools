@@ -1,10 +1,12 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import logging
 import os
 import sys
 import unittest
 import pkgutil
 import importlib
+
+# import tests
 
 
 def get_server_path():
@@ -33,7 +35,6 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
 
     # discover tests
-    importlib.import_module("./tests")
     for module in pkgutil.iter_modules(["tests"]):
         module_name = module[1]
         if module_name.startswith("test"):

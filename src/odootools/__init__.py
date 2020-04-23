@@ -17,5 +17,5 @@ try:
     from . import odooconnection
     from . import odooscript
 except (ModuleNotFoundError, ImportError):
-    logging.error("error on Odoo import")
+    logging.exception("error on Odoo import")
     sysexit(1)
