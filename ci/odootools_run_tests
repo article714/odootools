@@ -27,10 +27,13 @@ if __name__ == "__main__":
     sys.path.append(odoo_path)
     sys.path.append("./src/")
 
-    # discover tests
+    # prepare testSuite
     loader = unittest.TestLoader()
     runner = unittest.TextTestRunner()
     suite = unittest.TestSuite()
+
+    # discover tests
+    importlib.import_module("./tests")
     for module in pkgutil.iter_modules(["tests"]):
         module_name = module[1]
         if module_name.startswith("test"):
