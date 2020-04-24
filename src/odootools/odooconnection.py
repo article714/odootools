@@ -15,7 +15,6 @@ import copy
 import logging
 import sys
 import xmlrpc.client as xmlrpclib
-from xmlrpc import ConnectionRefusedError
 
 from .stringconverters import to_string
 
