@@ -196,7 +196,7 @@ class Connection:
         return None
 
     # *************************************************************************
-    def odoo_search_create_or_write(  # pylint: disable=too-many-arguments,dangerous-default-value
+    def odoo_search_create_or_write(  # pylint: disable=too-many-arguments,dangerous-default-value,too-many-branches
         self,
         model_name,
         search_criteria=[],
