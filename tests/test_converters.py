@@ -16,6 +16,8 @@ import unittest
 
 from odootools import stringconverters
 
+TRAVIS_TEST = True
+
 
 class TestConverters(unittest.TestCase):
     """

@@ -20,6 +20,12 @@ def get_server_path():
 
 if __name__ == "__main__":
 
+    # Check if in Travis or not
+
+    TRAVIS_CI = False
+    if len(sys.argv) == 2:
+        TRAVIS_CI = sys.argv[1] == "TRAVIS"
+
     # init logging
     logging.basicConfig()
     logging.getLogger().setLevel(logging.DEBUG)
@@ -41,7 +47,10 @@ if __name__ == "__main__":
         module_name = module[1]
         if module_name.startswith("test"):
             mod = importlib.import_module(".{}".format(module_name), "tests")
-            if "_addTestsToSuite" in dir(mod):
+            run = True
+            if "TRAVIS_TEST" in dir(mod):
+                run = mod.TRAVIS_TEST
+            if run and "_addTestsToSuite" in dir(mod):
                 mod._addTestsToSuite(suite)
             else:
                 suite.addTest(loader.loadTestsFromModule(mod))

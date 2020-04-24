@@ -69,7 +69,7 @@ jobs:
     - env: ODOO_REPO="OCA/OCB"
       script:
         - chmod +x ci/odootools_run_tests
-        - odootools_run_tests
+        - odootools_run_tests TRAVIS
 
 after_success:
   - travis_after_tests_success

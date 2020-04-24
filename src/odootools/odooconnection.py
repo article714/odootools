@@ -15,6 +15,7 @@ import copy
 import logging
 import sys
 import xmlrpc.client as xmlrpclib
+from xmlrpc import ConnectionRefusedError
 
 from .stringconverters import to_string
 
@@ -99,7 +100,11 @@ class Connection:
             "{}/xmlrpc/db".format(url), allow_none=True
         )
 
-        self.srv_ver = float(dbproxy.server_version().split("-")[0])
+        try:
+            self.srv_ver = float(dbproxy.server_version().split("-")[0])
+        except ConnectionRefusedError:
+            self.error("Cannot Connect to Odoo Server")
+            return None
         self.logger.info(
             " Connected to odoo server version %s", str(self.srv_ver)
         )
