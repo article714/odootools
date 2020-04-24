@@ -13,6 +13,14 @@ class UpgradeAllModules(odooscript.AbstractOdooScript):
     See run()
     """
 
+    def __init__(self):
+        super(UpgradeAllModules, self).__init__()
+
+        self.odooargs = []
+        self.env = None
+        self.cursor = None
+        self.dbname = None
+
     def run(self):
         """
         Simple OdooScript to upgrade all installed modules
@@ -20,7 +28,6 @@ class UpgradeAllModules(odooscript.AbstractOdooScript):
 
         self.init_logs()
 
-        self.odooargs = []
         # Do we still need this?
         if self.config is not None:
 

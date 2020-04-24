@@ -14,7 +14,7 @@ try:
     import gevent.monkey
 
     GEVENT_OK = True
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     GEVENT_OK = False
     logging.warning("error on import gevent modules ")
 
@@ -23,7 +23,7 @@ try:
     from odoo.modules import get_module_path, get_modules
 
     ODOO_OK = True
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     ODOO_OK = False
     logging.error("error on Odoo import")
 

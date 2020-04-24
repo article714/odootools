@@ -6,7 +6,9 @@ Simple OdooScript to verify a provided config file
 from odootools import odooscript
 
 
-class TestConfigFile(odooscript.AbstractOdooScript):
+class TestConfigFile(  # pylint: disable=too-few-public-methods
+    odooscript.AbstractOdooScript
+):
     """
     Verifies that provided config file is correct
     """

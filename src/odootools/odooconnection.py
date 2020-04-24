@@ -25,7 +25,7 @@ try:
     PGDB = "connect" in dir(
         pgdb
     )  # may have confusion between PyGreSQL et pgdb modules :(
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     PGDB = False
     logging.warning(
         "error on import PGDB module => cannot connect locally to POSTGRESQL "

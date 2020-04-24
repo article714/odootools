@@ -42,7 +42,9 @@ class UpdateTranslations(odooscript.AbstractOdooScript):
     # Main
 
     def run(self):
-
+        """
+        Do the processing, i.e. load translations
+        """
         languages = self.get_languages()
         self.logger.warning(
             u"Will reload all following languages: %s", str(languages)

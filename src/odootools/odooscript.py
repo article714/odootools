@@ -25,13 +25,13 @@ try:
     import odoo
 
     ODOO_OK = True
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     ODOO_OK = False
     logging.error("error on Odoo import")
 
 try:
     from odoo.tools import config
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     ODOO_OK = False
     logging.error("ImportError: config from odoo.tools")
 
@@ -191,7 +191,8 @@ class AbstractOdooScript(
             logpath = output_dir + os.path.sep
             filename_ts = datetime.datetime.now().strftime("%Y-%m-%d")
             file_hdlr = logging.FileHandler(
-                filename=f"{logpath}{self.name}_{filename_ts}.log", mode="w",
+                filename="{}{}_{}.log".format(logpath, self.name, filename_ts),
+                mode="w",
             )
             file_hdlr.setLevel(level=logging.INFO)
 

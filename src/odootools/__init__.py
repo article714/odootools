@@ -16,6 +16,6 @@ try:
     from . import converters
     from . import odooconnection
     from . import odooscript
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     logging.exception("error on Odoo import")
     sysexit(1)

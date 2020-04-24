@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Simple OdooScript to build a graph of installed module deps
@@ -13,14 +13,14 @@ try:
     import networkx
     from networkx.readwrite import GraphMLWriter
     from networkx.utils import make_str
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     logging.error("error on import: missing networkx")
     sysexit(1)
 
 try:
     import matplotlib.pyplot as plt
     from matplotlib.colors import to_rgba, to_hex
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     logging.error("error on import: missing networkx")
     sysexit(1)
 
@@ -191,7 +191,7 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
 
         # write outputs
 
-        plt.savefig(f"odoo_dependencies_{name}.png")
+        plt.savefig("odoo_dependencies_{}.png".format(name))
 
     # ***********************************
     # Main

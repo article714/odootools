@@ -11,11 +11,11 @@ setup(
         "write_to": "src/odootools/version.py",
         "write_to_template": '__version__ = "{version}"',
     },
-    python_requires=">=3.7, <4",
+    python_requires=">=3.5, <4",
     install_requires=["configobj", "psycogreen"],
     setup_requires=[
-        # this cannot be enabled until https://github.com/pypa/pip/issues/7778 is addressed
-        # "setuptools_scm >= 2"
+        # this cannot be enabled until https://github.com/pypa/pip/issues/7778
+        # is addressed "setuptools_scm >= 2"
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
