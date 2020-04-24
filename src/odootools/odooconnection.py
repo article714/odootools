@@ -211,18 +211,26 @@ class Connection:
         if self.xmlrpc_uid is None:
             self.get_odoo_xmlrpc_connection()
         try:
+            if self.xmlrpc_models is None:
+                self.logger.error("Not Connected to Odoo Database/Server")
+                return None
+
+            result_params = {"offset": 0, "count": False}
             if can_be_archived:
                 full_search = copy.copy(search_criteria)
                 for val in ALL_INSTANCES_FILTER:
                     full_search.append(val)
                 found = self.odoo_search(
-                    model_name, full_search, [0, 0, False, False]
+                    model_name, full_search, result_params
                 )
             else:
 
                 found = self.odoo_search(
-                    model_name, search_criteria, [0, 0, False, False]
+                    model_name, search_criteria, result_params
                 )
+
+                if found is None:
+                    return None
 
             lfound = len(found)
             # create only if do not exist
@@ -294,43 +302,46 @@ class Connection:
             self.get_odoo_xmlrpc_connection()
         try:
 
-            if result_parameters:
-                result_parameters["context"] = self.odoo_context
-            else:
-                result_parameters = {"context": self.odoo_context}
+            if self.xmlrpc_models is not None:
+                if result_parameters:
+                    result_parameters["context"] = self.odoo_context
+                else:
+                    result_parameters = {"context": self.odoo_context}
 
-            if self.srv_ver > 8.0:
-                result = self.xmlrpc_models.execute_kw(
+                if self.srv_ver > 8.0:
+                    result = self.xmlrpc_models.execute_kw(
+                        self.context.get_config_value("db_name"),
+                        self.xmlrpc_uid,
+                        self.context.get_config_value("odoo_password"),
+                        model_name,
+                        "search_read",
+                        [search_conditions],
+                        result_parameters,
+                    )
+                    return result
+
+                found = self.xmlrpc_models.execute_kw(
                     self.context.get_config_value("db_name"),
                     self.xmlrpc_uid,
                     self.context.get_config_value("odoo_password"),
                     model_name,
-                    "search_read",
+                    "search",
                     [search_conditions],
-                    result_parameters,
-                )
-                return result
-
-            found = self.xmlrpc_models.execute_kw(
-                self.context.get_config_value("db_name"),
-                self.xmlrpc_uid,
-                self.context.get_config_value("odoo_password"),
-                model_name,
-                "search",
-                [search_conditions],
-                {"context": self.odoo_context},
-            )
-            if found:
-                result = self.xmlrpc_models.execute_kw(
-                    self.context.get_config_value("db_name"),
-                    self.xmlrpc_uid,
-                    self.context.get_config_value("odoo_password"),
-                    model_name,
-                    "read",
-                    [found],
                     {"context": self.odoo_context},
                 )
-                return result
+                if found:
+                    result = self.xmlrpc_models.execute_kw(
+                        self.context.get_config_value("db_name"),
+                        self.xmlrpc_uid,
+                        self.context.get_config_value("odoo_password"),
+                        model_name,
+                        "read",
+                        [found],
+                        {"context": self.odoo_context},
+                    )
+                    return result
+            else:
+                self.logger.error("Not Connected to Odoo Database/Server")
 
             return ()
 

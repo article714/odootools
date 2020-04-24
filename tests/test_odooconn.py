@@ -55,6 +55,7 @@ class TestOdooConn(unittest.TestCase):
         found = self.connection.odoo_idsearch(
             "res.partner", [("is_company", "=", True)]
         )
+        self.assertIsNotNone(found)
         self.assertGreater(len(found), 0, "No partner found, issue!")
 
     def test_odoo_search_create_or_write(self):
