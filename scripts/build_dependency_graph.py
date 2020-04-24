@@ -280,7 +280,11 @@ class BuildDependencyGraph(odooscript.AbstractOdooScript):
                 )
 
                 self.draw_graph(
-                    size, f"{pos0}_spring", pos1, node_colors, edge_colors
+                    size,
+                    "{}_spring".format(pos0),
+                    pos1,
+                    node_colors,
+                    edge_colors,
                 )
 
             for node in self.graph.nodes:

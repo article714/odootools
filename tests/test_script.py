@@ -34,7 +34,7 @@ class TestOdooScript(unittest.TestCase):
         Simply test parsing config file
         """
         self.inner_script.parse_config(
-            configfile="tests{}etc{}testScript.config".format(sep, sep)
+            configfile="tests{asep}etc{asep}testScript.config".format(asep=sep)
         )
         self.assertEqual(
             self.inner_script.get_config_value("language"),
