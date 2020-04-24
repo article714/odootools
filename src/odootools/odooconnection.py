@@ -102,7 +102,7 @@ class Connection:
         try:
             self.srv_ver = float(dbproxy.server_version().split("-")[0])
         except ConnectionRefusedError:
-            self.error("Cannot Connect to Odoo Server")
+            self.logger.error("Cannot Connect to Odoo Server")
             return None
         self.logger.info(
             " Connected to odoo server version %s", str(self.srv_ver)
