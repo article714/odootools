@@ -52,7 +52,7 @@ if __name__ == "__main__":
                 run = mod.TRAVIS_TEST
             if run and "_addTestsToSuite" in dir(mod):
                 mod._addTestsToSuite(suite)
-            else:
+            elif run:
                 suite.addTest(loader.loadTestsFromModule(mod))
     # run tests
     results = runner.run(suite)
