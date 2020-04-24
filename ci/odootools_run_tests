@@ -35,10 +35,11 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
 
     # discover tests
+    root_mod = importlib.import_module("tests")
     for module in pkgutil.iter_modules(["tests"]):
         module_name = module[1]
         if module_name.startswith("test"):
-            mod = importlib.import_module(".{}".format(module_name), "tests")
+            mod = importlib.import_module("tests.{}".format(module_name))
             if "_addTestsToSuite" in dir(mod):
                 mod._addTestsToSuite(suite)
             else:
