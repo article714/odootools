@@ -17,7 +17,7 @@ import unittest
 
 from .scripts.a_sample_script import SampleScript
 
-TRAVIS_TEST = True
+TRAVIS_TEST = "Yes"
 
 
 class TestOdooScript(unittest.TestCase):

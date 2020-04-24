@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""
+Script to select and run tests depending on environment
+"""
+
 import logging
 import os
 import sys
@@ -6,10 +10,11 @@ import unittest
 import pkgutil
 import importlib
 
-# import tests
-
 
 def get_server_path():
+    """
+    Get The location of odoo installation (Travis)
+    """
     odoo_org, odoo_repo = os.environ.get("ODOO_REPO", "odoo/odoo").split("/")
     odoo_version = os.environ.get("VERSION").replace("/", "-")
 
@@ -31,31 +36,31 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
 
     # adds odoo & odootools to PATH
-    odoo_path = get_server_path()
-    sys.path.append(odoo_path)
+    ODOO_PATH = get_server_path()
+    sys.path.append(ODOO_PATH)
     sys.path.append("./src/")
     sys.path.insert(0, "./")
 
     # prepare testSuite
-    loader = unittest.TestLoader()
-    runner = unittest.TextTestRunner()
-    suite = unittest.TestSuite()
+    LOADER = unittest.TestLoader()
+    RUNNER = unittest.TextTestRunner()
+    SUITE = unittest.TestSuite()
 
     # discover tests
-    root_mod = importlib.import_module("tests", ".")
+    importlib.import_module("tests", ".")
     for module in pkgutil.iter_modules(["./tests"]):
         module_name = module[1]
         if module_name.startswith("test"):
             mod = importlib.import_module(".{}".format(module_name), "tests")
             run = True
             if "TRAVIS_TEST" in dir(mod):
-                run = mod.TRAVIS_TEST
+                run = mod.TRAVIS_TEST == "Yes"
             if run and "_addTestsToSuite" in dir(mod):
-                mod._addTestsToSuite(suite)
+                mod._addTestsToSuite(SUITE)
             elif run:
-                suite.addTest(loader.loadTestsFromModule(mod))
+                SUITE.addTest(LOADER.loadTestsFromModule(mod))
     # run tests
-    results = runner.run(suite)
+    results = RUNNER.run(SUITE)
     if results.failures or results.errors:
         sys.exit(1)
     else:

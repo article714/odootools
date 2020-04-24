@@ -18,6 +18,9 @@ from odootools import odooconnection
 from .scripts.a_sample_script import SampleScript
 
 
+TRAVIS_TEST = "No"
+
+
 class TestOdooConn(unittest.TestCase):
     """
     Odoo Connection Test
