@@ -28,7 +28,7 @@ if __name__ == "__main__":
     odoo_path = get_server_path()
     sys.path.append(odoo_path)
     sys.path.append("./src/")
-    sys.path.append("./")
+    sys.path.insert(0, "./")
 
     # prepare testSuite
     loader = unittest.TestLoader()
@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     # discover tests
     print(sys.path)
-    root_mod = importlib.import_module("tests")
+    root_mod = importlib.import_module("tests", ".")
     print(root_mod)
-    for module in pkgutil.iter_modules(["tests"]):
+    for module in pkgutil.iter_modules(["./tests"]):
         print(module)
         module_name = module[1]
         if module_name.startswith("test"):
