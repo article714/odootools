@@ -9,6 +9,7 @@ Utility functions to convert data
 @license: AGPL
 """
 
+import configparser
 import datetime
 import getopt
 import logging
@@ -16,8 +17,6 @@ import os.path
 import sys
 import traceback
 from abc import ABCMeta, abstractmethod
-
-from configobj import ConfigObj, ConfigObjError
 
 from . import odooconnection
 
@@ -255,13 +254,21 @@ class AbstractOdooScript(
 
         if self.config is None:
             try:
+                self.config = configparser.ConfigParser()
+                self.config.read(self.configfile)
+            except configparser.MissingSectionHeaderError:
+                with open(self.configfile) as f:
+                    config_string = f.read()
+                self.config.read_string("[options]\n" + config_string)
 
-                self.config = ConfigObj(self.configfile)
-            except ConfigObjError:
+            except configparser.Error as err:
                 self.logger.error(
-                    "ERROR: Cannot parse config file, syntax error (%s)",
+                    "ERROR: Cannot parse config file, syntax "
+                    "error (file: %s): %s",
                     self.configfile,
+                    str(err),
                 )
+
         else:
             self.logger.warning("Configuration has already been processed")
 

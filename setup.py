@@ -12,7 +12,7 @@ setup(
         "write_to_template": '__version__ = "{version}"',
     },
     python_requires=">=3.5, <4",
-    install_requires=["configobj", "psycogreen"],
+    install_requires=["psycogreen"],
     setup_requires=[
         # this cannot be enabled until https://github.com/pypa/pip/issues/7778
         # is addressed "setuptools_scm >= 2"
