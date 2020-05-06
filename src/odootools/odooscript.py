@@ -221,7 +221,7 @@ class AbstractOdooScript(
                 file_hdlr.setLevel(logging.ERROR)
 
     # *************************************************************
-    def get_config_value(self, name, section="options", default=None):
+    def get_config_value(self, name, default=None, section="options"):
         """
         Utils to get values from config
         """
