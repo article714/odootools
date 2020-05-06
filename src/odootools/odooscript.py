@@ -221,12 +221,12 @@ class AbstractOdooScript(
                 file_hdlr.setLevel(logging.ERROR)
 
     # *************************************************************
-    def get_config_value(self, name, default=None):
+    def get_config_value(self, name, section="options", default=None):
         """
         Utils to get values from config
         """
         if self.config is not None:
-            return self.config.get(name, default)
+            return self.config.get(section, name, fallback=default)
         return None
 
     # *************************************************************
@@ -257,8 +257,8 @@ class AbstractOdooScript(
                 self.config = configparser.ConfigParser()
                 self.config.read(self.configfile)
             except configparser.MissingSectionHeaderError:
-                with open(self.configfile) as f:
-                    config_string = f.read()
+                with open(self.configfile) as afile:
+                    config_string = afile.read()
                 self.config.read_string("[options]\n" + config_string)
 
             except configparser.Error as err:
