@@ -226,7 +226,10 @@ class AbstractOdooScript(
         Utils to get values from config
         """
         if self.config is not None:
-            return self.config.get(section, name, fallback=default)
+            value = self.config.get(section, name, fallback=default)
+            # Compatibility with old odoo scripts
+            if isinstance(value, str):
+                value.replace('"', "")
         return None
 
     # *************************************************************

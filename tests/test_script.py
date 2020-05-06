@@ -38,6 +38,9 @@ class TestOdooScript(unittest.TestCase):
         self.inner_script.parse_config(
             configfile="tests{asep}etc{asep}testScript.config".format(asep=sep)
         )
+
+        print(self.inner_script.config)
+
         self.assertEqual(
             self.inner_script.get_config_value("language"),
             "fr_FR",
