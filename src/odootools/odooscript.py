@@ -230,6 +230,7 @@ class AbstractOdooScript(
             # Compatibility with old odoo scripts
             if isinstance(value, str):
                 value.replace('"', "")
+            return value
         return None
 
     # *************************************************************
