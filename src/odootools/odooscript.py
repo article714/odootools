@@ -159,9 +159,9 @@ class AbstractOdooScript(
 
         if self.config is not None:
             interactive = (
-                self.get_config_value("INTERACTIVE", fallback=0) == "1"
+                self.get_config_value("INTERACTIVE", default=0) == "1"
             )
-            debug = self.get_config_value("DEBUG", fallback=0) == "1"
+            debug = self.get_config_value("DEBUG", default=0) == "1"
 
         if self.logger is not None:
             for handlr in self.log_handlers:
