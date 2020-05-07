@@ -158,8 +158,10 @@ class AbstractOdooScript(
         debug = False
 
         if self.config is not None:
-            interactive = self.config.get("INTERACTIVE", 0) == "1"
-            debug = self.config.get("DEBUG", 0) == "1"
+            interactive = (
+                self.get_config_value("INTERACTIVE", fallback=0) == "1"
+            )
+            debug = self.get_config_value("DEBUG", fallback=0) == "1"
 
         if self.logger is not None:
             for handlr in self.log_handlers:
@@ -227,20 +229,28 @@ class AbstractOdooScript(
         """
         Utils to get values from config
         """
-        if self.config is not None:
-            if datatype == "bool":
-                value = self.config.getboolean(section, name, fallback=default)
-            elif datatype == "float":
-                value = self.config.getfloat(section, name, fallback=default)
-            elif datatype == "int":
-                value = self.config.getint(section, name, fallback=default)
-            else:
-                value = self.config.get(section, name, fallback=default)
-            # Compatibility with old odooscripts
-            if isinstance(value, str):
-                value = value.replace('"', "")
-            return value
-        return None
+        try:
+            if self.config is not None:
+                if datatype == "bool":
+                    value = self.config.getboolean(
+                        section, name, fallback=default
+                    )
+                elif datatype == "float":
+                    value = self.config.getfloat(
+                        section, name, fallback=default
+                    )
+                elif datatype == "int":
+                    value = self.config.getint(section, name, fallback=default)
+                else:
+                    value = self.config.get(section, name, fallback=default)
+                # Compatibility with old odooscripts
+                if isinstance(value, str):
+                    value = value.replace('"', "")
+                return value
+        except configparser.Error:
+            self.logger.warning("No Key or section found")
+            return default
+        return default
 
     # *************************************************************
     def parse_config(self, configfile=None):
