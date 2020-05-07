@@ -70,3 +70,8 @@ class TestOdooScript(unittest.TestCase):
             True,
             "Unable to parse config",
         )
+
+        self.assertIsNone(
+            self.inner_script.get_config_value("nonexistent", datatype="bool"),
+            "Unable to parse config",
+        )
