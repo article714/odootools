@@ -38,8 +38,35 @@ class TestOdooScript(unittest.TestCase):
         self.inner_script.parse_config(
             configfile="tests{asep}etc{asep}testScript.config".format(asep=sep)
         )
+
         self.assertEqual(
             self.inner_script.get_config_value("language"),
             "fr_FR",
+            "Unable to parse config",
+        )
+
+    def test_parse_config_sections(self):
+        """
+        Simply test parsing config file with sections
+        """
+        self.inner_script.parse_config(
+            configfile="tests{asep}etc{asep}testSections.config".format(
+                asep=sep
+            )
+        )
+        self.assertEqual(
+            self.inner_script.get_config_value("language", section="GENERAL"),
+            "fr_FR",
+            "Unable to parse config",
+        )
+        self.assertEqual(
+            self.inner_script.get_config_value("testing"),
+            "true",
+            "Unable to parse config",
+        )
+
+        self.assertEqual(
+            self.inner_script.get_config_value("testing", datatype="bool"),
+            True,
             "Unable to parse config",
         )
