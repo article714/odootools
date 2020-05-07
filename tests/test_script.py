@@ -39,8 +39,6 @@ class TestOdooScript(unittest.TestCase):
             configfile="tests{asep}etc{asep}testScript.config".format(asep=sep)
         )
 
-        print(self.inner_script.config)
-
         self.assertEqual(
             self.inner_script.get_config_value("language"),
             "fr_FR",
@@ -64,5 +62,11 @@ class TestOdooScript(unittest.TestCase):
         self.assertEqual(
             self.inner_script.get_config_value("testing"),
             "true",
+            "Unable to parse config",
+        )
+
+        self.assertEqual(
+            self.inner_script.get_config_value("testing", datatype="bool"),
+            True,
             "Unable to parse config",
         )

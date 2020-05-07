@@ -36,10 +36,11 @@ if __name__ == "__main__":
     logging.getLogger().setLevel(logging.DEBUG)
 
     # adds odoo & odootools to PATH
-    ODOO_PATH = get_server_path()
-    sys.path.append(ODOO_PATH)
-    sys.path.append("./src/")
-    sys.path.insert(0, "./")
+    if TRAVIS_CI:
+        ODOO_PATH = get_server_path()
+        sys.path.append(ODOO_PATH)
+        sys.path.append("./src/")
+        sys.path.insert(0, "./")
 
     # prepare testSuite
     LOADER = unittest.TestLoader()

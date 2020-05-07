@@ -221,15 +221,24 @@ class AbstractOdooScript(
                 file_hdlr.setLevel(logging.ERROR)
 
     # *************************************************************
-    def get_config_value(self, name, default=None, section="options"):
+    def get_config_value(
+        self, name, default=None, section="options", datatype="str"
+    ):
         """
         Utils to get values from config
         """
         if self.config is not None:
-            value = self.config.get(section, name, fallback=default)
-            # Compatibility with old odoo scripts
+            if datatype == "bool":
+                value = self.config.getboolean(section, name, fallback=default)
+            elif datatype == "float":
+                value = self.config.getfloat(section, name, fallback=default)
+            elif datatype == "int":
+                value = self.config.getint(section, name, fallback=default)
+            else:
+                value = self.config.get(section, name, fallback=default)
+            # Compatibility with old odooscripts
             if isinstance(value, str):
-                value.replace('"', "")
+                value = value.replace('"', "")
             return value
         return None
 
