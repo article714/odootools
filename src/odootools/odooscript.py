@@ -323,12 +323,12 @@ class AbstractOdooScript(
             self.dbname = self.get_config_value("db_name")
 
             if self.dbname is not None and ODOO_OK:
-                self.logger.info("CONNECTING TO DB : %s", {self.dbname})
+                self.logger.info("CONNECTING TO DB : %s", self.dbname)
             else:
                 self.logger.error(
-                    " Cannot connect to Odoo DB : {}".format(self.dbname)
+                    " Cannot connect to Odoo DB : %s", self.dbname
                 )
-                return -1
+                return
 
             if ODOO_OK and self.config is not None:
 
