@@ -324,21 +324,31 @@ class AbstractOdooScript(
 
             if self.dbname is not None and ODOO_OK:
                 self.logger.info("CONNECTING TO DB : %s", {self.dbname})
+            else:
+                self.logger.error(
+                    " Cannot connect to Odoo DB : {}".format(self.dbname)
+                )
+                return -1
 
             if ODOO_OK and self.config is not None:
-                self.odooargs.append(
-                    "-c" + self.get_config_value("odoo_config")
-                )
+
+                val = self.get_config_value("odoo_config")
+                if val is not None:
+                    self.odooargs.append("-c {}".format(val))
+
                 self.odooargs.append("-d" + self.dbname)
-                self.odooargs.append(
-                    "--db_host=" + self.get_config_value("db_host")
-                )
-                self.odooargs.append(
-                    "-r" + self.get_config_value("db_username")
-                )
-                self.odooargs.append(
-                    "-w" + self.get_config_value("db_password")
-                )
+
+                val = self.get_config_value("db_host")
+                if val is not None:
+                    self.odooargs.append("--db_host={}".format(val))
+
+                val = self.get_config_value("db_username")
+                if val is not None:
+                    self.odooargs.append("-r {}".format(val))
+
+                val = self.get_config_value("db_password")
+                if val is not None:
+                    self.odooargs.append("-w {}".format(val))
 
             config.parse_config(self.odooargs)
 
