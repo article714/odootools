@@ -4,7 +4,7 @@ cache: pip
 
 python:
   # For branches <= 10.0, put `- "2.7.13"`
-  - '3.5'
+  - '2.7.13'
 
 addons:
   # By default postgresql-9.1 is installed but there is issue related:
@@ -29,7 +29,7 @@ addons:
 
 env:
   global:
-    - VERSION="11.0" TESTS="0" LINT_CHECK="0" MAKEPOT="0"
+    - VERSION="10.0" TESTS="0" LINT_CHECK="0" MAKEPOT="0"
     # Set this variable to some version existing as linux-generic build on
     # https://github.com/wkhtmltopdf/wkhtmltopdf/releases
     # if you need to install wkhtmltopdf
@@ -49,8 +49,8 @@ install:
   - git clone --depth=1 https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools
   - export PATH=${HOME}/maintainer-quality-tools/travis:./ci/:${PATH}
   - travis_install_nightly
-  - pip3 install -r requirements.txt
-  - pip3 install -r ci/requirements.txt
+  - pip install -r requirements.txt
+  - pip install -r ci/requirements.txt
 
 jobs:
   include:
