@@ -334,7 +334,7 @@ class AbstractOdooScript(
 
                 val = self.get_config_value("odoo_config")
                 if val is not None:
-                    self.odooargs.append("-c {}".format(val))
+                    self.odooargs.append("--config={}".format(val))
 
                 self.odooargs.append("-d" + self.dbname)
 
