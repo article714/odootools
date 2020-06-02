@@ -24,12 +24,12 @@ class TestConverters(unittest.TestCase):
     Test String converters
     """
 
-    def setUp(self):
+    def setUp(self):  # pylint: disable=invalid-name
         """Test Init"""
         super(TestConverters, self).setUp()
         self.a_date = datetime.now()
 
-    def test_date_to_string(self):
+    def test_date_to_string(self):  # pylint: disable=invalid-name
         """Test Date formatting to String"""
         val = stringconverters.to_string(self.a_date)
         self.assertIsNotNone(val, "unable to translate date")
