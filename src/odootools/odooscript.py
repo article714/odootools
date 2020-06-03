@@ -336,7 +336,7 @@ class AbstractOdooScript(
                 if val is not None:
                     self.odooargs.append("--config={}".format(val))
 
-                self.odooargs.append("-d" + self.dbname)
+                self.odooargs.append("-d{}".format(self.dbname))
 
                 val = self.get_config_value("db_host")
                 if val is not None:
@@ -344,11 +344,11 @@ class AbstractOdooScript(
 
                 val = self.get_config_value("db_username")
                 if val is not None:
-                    self.odooargs.append("-r {}".format(val))
+                    self.odooargs.append("-r{}".format(val))
 
                 val = self.get_config_value("db_password")
                 if val is not None:
-                    self.odooargs.append("-w {}".format(val))
+                    self.odooargs.append("-w{}".format(val))
 
             config.parse_config(self.odooargs)
 
