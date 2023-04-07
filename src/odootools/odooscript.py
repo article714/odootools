@@ -52,6 +52,9 @@ class AbstractOdooScript(
     of scripts for Odoo
     """
 
+    getopt_options = "hc:"
+    getopt_long_options = ["help", "config="]
+
     # *************************************************************
     def __init__(self, parse_config=True):
         """
@@ -76,12 +79,12 @@ class AbstractOdooScript(
         self.logger = logging.getLogger(self.name)
         self.log_handlers = []
 
-        self.configfile = None
         self.config = None
 
         # ******
         # args parsing
         self._parse_args()
+        self.configfile = self.get_option("-c", "--config")
 
         # ******
         # config parsing
@@ -107,15 +110,15 @@ class AbstractOdooScript(
     # *************************************************************
     def print_help(self):
         """
-            Print help message when required parameter is missing
-            or when -h/--help is provided
+        Print help message when required parameter is missing
+        or when -h/--help is provided
         """
         print(self.get_help_message())  # pylint: disable=print-used
 
     # *************************************************************
     def get_help_message(self):
         """
-            build help message string
+        build help message string
         """
         help_message = "\nUSAGE : {}.py [OPTIONS] \n\n".format(self.name)
         help_message += "OPTIONS: \n\n"
@@ -126,27 +129,44 @@ class AbstractOdooScript(
 
     # *************************************************************
     def _parse_args(self):
-        """
-        Command line args
-        """
         try:
-            opts, unneededargs = getopt.getopt(
-                sys.argv[1:], "hc:", ["config="]
+            self.options, extra_args = getopt.getopt(
+                sys.argv[1:], self.getopt_options, self.getopt_long_options
             )
         except getopt.GetoptError:
             self.print_help()
             sys.exit(2)
 
-        for opt, arg in opts:
-            if opt == "-h":
-                print(  # pylint: disable=print-used
-                    self.name + " -c <configfile>"
-                )
-                sys.exit()
-            elif opt in ("-c", "--config"):
-                self.configfile = arg
-        for arg in unneededargs:
-            self.logger.warning("un-nedeed argument %s", str(arg))
+        self.options = dict(self.options)
+
+        try:
+            self.get_option("-h", "--help")
+            self.print_help()
+            sys.exit()
+        except KeyError:
+            pass
+
+        for arg in extra_args:
+            print("un-nedeed argument %s" % (str(arg),))
+
+    # *************************************************************
+    def get_option(self, option, long_option=None):
+        """
+        Return option value if option has been provided
+        else raise KeyError
+        """
+        found_options = set((option, long_option)) & set(self.options)
+        if found_options:
+            return self.options[found_options.pop()]
+
+        raise KeyError(
+            "There no such option provided as {}{}".format(
+                option,
+                " or {}".format(long_option)
+                if long_option is not None
+                else "",
+            )
+        )
 
     # *************************************************************
     def init_logs(self):
@@ -311,11 +331,12 @@ class AbstractOdooScript(
         self.run()
 
     # *************************************************************************
-    def run_in_odoo_context(self):
+    def run_in_odoo_context(self, context=None):
         """
         Execute main self script after starting an embedded Odoo Server
         """
-        self.init_logs()
+
+        # self.init_logs()
 
         self.odooargs = []
         if ODOO_OK and self.config is not None:
@@ -330,25 +351,21 @@ class AbstractOdooScript(
                 )
                 return
 
-            if ODOO_OK and self.config is not None:
+            odooargs = []
 
-                val = self.get_config_value("odoo_config")
-                if val is not None:
-                    self.odooargs.append("--config={}".format(val))
-
-                self.odooargs.append("-d{}".format(self.dbname))
-
-                val = self.get_config_value("db_host")
-                if val is not None:
-                    self.odooargs.append("--db_host={}".format(val))
-
-                val = self.get_config_value("db_username")
-                if val is not None:
-                    self.odooargs.append("-r{}".format(val))
-
-                val = self.get_config_value("db_password")
-                if val is not None:
-                    self.odooargs.append("-w{}".format(val))
+            odooargs.append(
+                "-c{}".format(os.environ["ODOO_RC"])
+            )  # self.get_config_value("odoo_config")
+            odooargs.append("-d{}".format(self.dbname))
+            odooargs.append(
+                "--db_host={}".format(self.get_config_value("db_host"))
+            )
+            odooargs.append(
+                "-r{}".format(self.get_config_value("db_username"))
+            )
+            odooargs.append(
+                "-w{}".format(self.get_config_value("db_password"))
+            )
 
             config.parse_config(self.odooargs)
 
@@ -357,17 +374,16 @@ class AbstractOdooScript(
             with odoo.api.Environment.manage():
                 registry = odoo.registry(self.dbname)
                 odoo.modules.load_modules(registry)
-                self.cursor = registry.cursor()
                 uid = odoo.SUPERUSER_ID
-                ctx = odoo.api.Environment(self.cursor, uid, {})[
-                    "res.users"
-                ].context_get()
-                self.env = odoo.api.Environment(self.cursor, uid, ctx)
-
-                self.run()
-
-                self.cursor.commit()
-                self.cursor.close()
+                with registry.cursor() as cur:
+                    if context is None:
+                        ctx = odoo.api.Environment(cur, uid, {})[
+                            "res.users"
+                        ].context_get()
+                    else:
+                        ctx = context
+                    env = odoo.api.Environment(cur, uid, ctx)
+                    self.run(cur, env)
 
         else:
             self.logger.error(
@@ -376,14 +392,14 @@ class AbstractOdooScript(
 
     # ************************************************************************
     @abstractmethod
-    def run(self):
+    def run(self, cur=None, env=None):
         """
         Main Processing Method
         """
 
     # ************************************************************************
     def excepthook(self, error_type, error_value, trace_back):
-        """ Will catch unhandled errors """
+        """Will catch unhandled errors"""
         self.print_help()
         text = "".join(
             traceback.format_exception(error_type, error_value, trace_back)
@@ -395,7 +411,7 @@ if __name__ == "__main__":
 
     class OdooScript(AbstractOdooScript):
         """
-            Subclass just to test AbstractOdooScript class
+        Subclass just to test AbstractOdooScript class
         """
 
         def run(self):
