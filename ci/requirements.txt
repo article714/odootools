@@ -1,0 +1,6 @@
+pytest
+pylint
+pylint-odoo
+networkx
+matplotlib
+PyGreSQL

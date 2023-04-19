@@ -1,0 +1,105 @@
+include:
+  - project: "article714/build-tools"
+    ref: main
+    file: "ci/python-job-templates.yml"
+
+variables:
+  # CI_DEBUG_TRACE: "true"
+  # Allow to run image with non root user
+  # FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: 1
+  POSTGRES_USER: odoo
+  POSTGRES_PASSWORD: odoo
+  POSTGRES_DB: testdb
+  POSTGRES_HOST_AUTH_METHOD: trust
+
+stages:
+  - quality
+  - security
+  - test
+  - publish
+  - container-scanning
+  - cleaning
+
+#-----------------------------------------
+# Job Templates
+
+.project_versions:
+  parallel:
+    matrix:
+      - PRODUCT_VERSION: "12.0"
+        ODOO_CONTAINER_VERSION: "23.1.0"
+        POSTGRESQL_IMAGE: postgres:11
+        PYTHON_VERSION: "3.8"
+        DEBIAN_VERSION: "bullseye"
+      - PRODUCT_VERSION: "14.0"
+        ODOO_CONTAINER_VERSION: "23.1.0"
+        POSTGRESQL_IMAGE: postgres:14
+        PYTHON_VERSION: "3.9"
+        DEBIAN_VERSION: "bullseye"
+      - PRODUCT_VERSION: "15.0"
+        ODOO_CONTAINER_VERSION: "23.1.0"
+        POSTGRESQL_IMAGE: postgres:14
+        PYTHON_VERSION: "3.10"
+        DEBIAN_VERSION: "bullseye"
+      - PRODUCT_VERSION: "16.0"
+        ODOO_CONTAINER_VERSION: "23.1.0"
+        POSTGRESQL_IMAGE: postgres:14
+        PYTHON_VERSION: "3.10"
+        DEBIAN_VERSION: "bullseye"
+
+.test_image:
+  stage: test
+  image:
+    name: ${DOCKER_REGISTRY_HOST}/article714/odoo-container:${PRODUCT_VERSION}-${ODOO_CONTAINER_VERSION}
+  parallel: !reference [.project_versions, parallel]
+
+.odoo_install:
+  extends: .test_image
+  services:
+    - name: $POSTGRESQL_IMAGE
+      alias: pgdb
+  variables:
+    ODOO_RC: /container/config/odoo/odoo.conf
+  before_script:
+    - cp tests/config/odoo.conf /container/config/odoo/odoo.conf
+    - chpst -u odoo python3 /container/tools/auto_addons_path.py
+    - chpst -u odoo odoo -d testdb -i base --stop-after-init -c $ODOO_RC
+    - chpst -u odoo python3 /container/tools/test_db_exists.py
+
+#------------------------------------------
+# Quality
+
+linting:
+  extends: .linting
+  parallel: !reference [.project_versions, parallel]
+  script:
+    - pip install -r ci/requirements.txt
+    - pylint --rcfile ci/pylint-rc src/odootools
+
+#------------------------------------------
+# Tests
+
+test_odoo_script:
+  extends: .odoo_install
+  script:
+    - export PYTHONPATH=${PYTHONPATH}:${PWD}/src
+    - chpst -u odoo  python3 tests/integration/test_odoo_script.py -c $ODOO_RC -e test_extra_param
+
+unit-tests:
+  stage: test
+  extends: .test_image
+  script:
+    - export PYTHONPATH=${PYTHONPATH}:${PWD}/src
+    - python3 -m pip install pytest
+    - pytest --rootdir=tests -c tests/pyunit/pytest.ini
+
+integration-tests:
+  stage: test
+  extends: .odoo_install
+  script:
+    - python3 -m pip install pytest
+    - export PYTHONPATH=${PYTHONPATH}:${PWD}/src
+    - export SVDIR=/container/config/services
+    - runsvdir -P ${SVDIR} &
+    - sleep 5
+    - pytest --rootdir=tests -c tests/integration/pytest.ini
