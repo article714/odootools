@@ -1,0 +1,23 @@
+
+run_checks () {
+	# looking for realpath
+    if [ ! -e /usr/bin/realpath ]; then
+       echo "ERROR: cannot find realpath exe"
+       exit -1
+    fi
+	# tools directory is defined
+    if [ "${tools_directory}" = "" ]; then
+       echo "ERROR: missing configuration variable tools_directory"
+       exit -1
+    elif [ ! -d ${tools_directory} ]; then
+       echo "ERROR: tools_directory is not a directory"
+    fi
+	# odoo.conf exists
+    if [ "${odoo_config}" = "" ]; then
+       echo "ERROR: missing configuration variable odoo_config"
+       exit -1
+    elif [ ! -f ${odoo_config} ]; then
+       echo "ERROR: odoo_config is not a file, or cannot read it"
+    fi
+	
+}

@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#set -x
+
+#-------------------
+# test args
+
+if [ "${1}" = "" ] ; then
+	echo 
+	echo "USAGE: ${0} <configfile>"
+	echo
+	exit -1
+fi
+
+source ${1}
+
+#-------------------
+# checks
+
+if [ -f ${tools_directory}/bin/script-functions ]; then
+   source  ${tools_directory}/bin/script-functions
+   run_checks
+else
+   echo "ERROR: cannot find script-functions file"
+   exit -1
+fi
+
+#-------------------
+# find Config file
+
+if [ -f ${odoo_config} ] ; then
+	CONFIG_FILE=`realpath ${odoo_config}`
+else
+	echo "ERROR: cannot find config file ${odoo_config}"
+	exit -1
+fi
+
+
+#-------------------
+# must run as ${os_user}
+
+user=`id -u -n`
+
+if [ "${os_user}" = "" ]; then
+	echo "NO os_user DEFINED, RUNNING AS CURRENT USER: ${user}";
+elif  [ "${user}" != "${os_user}" ]; then
+	echo "YOU MUST RUN THIS SCRIPT AS ${os_user}"
+	exit -1
+fi
+
+
+
+ADDONS_DIR="${addons_directory}"
+
+CUR_DIR=`pwd`
+
+if [ -d $ADDONS_DIR ]; then
+	LIST_DIRS=`find $ADDONS_DIR -name .git -exec dirname {} \;`
+	
+	for d in $LIST_DIRS; do
+		cd $d
+		inside_git_repo="$(git rev-parse --is-inside-work-tree 2>/dev/null)"
+
+		if [ "$inside_git_repo" ]; then
+			echo "#### Pulling Source Code into $d"
+			git clean -d -f
+			git pull
+			git reset --hard		  
+		else
+			echo  "#### $d is not a git workdir"
+		fi
+	
+		
+	done
+else
+	echo "cannot find addons directory: ${ADDONS_DIR}"
+	exit -1
+fi
+
+cd ${CUR_DIR}
